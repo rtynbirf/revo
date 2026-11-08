@@ -655,7 +655,7 @@ def autolog(outdir: str, outfile: str = "AUTO-LOG.md") -> str:
 def selftest() -> int:
     import tempfile
     ok = 0
-    total = 10
+    total = 12  # 10 проверок ядра (M0/M1) + 2 проверки M2 (детерминизм N-02, сервер F-14)
     tmp = tempfile.mkdtemp(prefix="revo-selftest-")
     good = {"canvas": {"w": 640, "h": 360},
             "style": {"palette": {"base": "#0b0f1a", "accent": "#14b8a6"}},
@@ -699,6 +699,63 @@ def selftest() -> int:
                and isinstance(rep["prompt"], str) and len(rep["prompt"]) > 50)
     print(("PASS" if pipe_ok else "FAIL"), "10 pipeline v1-режим одним вызовом")
     ok += pipe_ok
+
+    # 11. детерминизм offline-рендера (N-02): одинаковый layout → байт-в-байт одинаковый PNG
+    ok11, note11 = False, ""
+    try:
+        dc = json.loads((Path(__file__).resolve().parent / "layouts" / "datacenter.json")
+                        .read_text(encoding="utf-8"))
+        a = render_offline(dc, f"{tmp}/det_a.png")
+        b = render_offline(dc, f"{tmp}/det_b.png")
+        ha = hashlib.sha256(Path(a).read_bytes()).hexdigest()
+        hb = hashlib.sha256(Path(b).read_bytes()).hexdigest()
+        ok11 = bool(ha) and ha == hb
+    except Exception as e:
+        note11 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok11 else "FAIL"),
+          f"11 детерминизм offline-рендера (SHA256 двух рендеров datacenter){' — ' + note11 if note11 else ''}")
+    ok += ok11
+
+    # 12. сервер M2 (F-14): revo_server.py в subprocess на свободном порту, /health → 200 и "ok": true
+    ok12, note12 = False, ""
+    srv = Path(__file__).resolve().parent / "revo_server.py"
+    if not srv.exists():
+        note12 = "revo_server.py не найден рядом с revo.py"
+    else:
+        import socket
+        import time
+        import urllib.request
+        s = socket.socket()
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+        s.close()
+        proc = subprocess.Popen([sys.executable, str(srv), "--port", str(port)],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            deadline = time.time() + 20
+            while time.time() < deadline:
+                if proc.poll() is not None:
+                    note12 = f"сервер завершился раньше времени (code {proc.returncode})"
+                    break
+                try:
+                    with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=2) as r:
+                        if r.status == 200 and json.loads(r.read().decode("utf-8")).get("ok") is True:
+                            ok12 = True
+                            break
+                except Exception:
+                    time.sleep(0.2)
+            else:
+                note12 = "сервер не ответил /health 200 за 20 с"
+        finally:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except Exception:
+                proc.kill()
+    print(("PASS" if ok12 else "FAIL"),
+          f"12 revo_server.py /health → 200 и ok:true{' — ' + note12 if note12 else ''}")
+    ok += ok12
+
     print(f"--- selftest {ok}/{total}")
     return 0 if ok == total else 1
 

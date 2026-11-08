@@ -1,7 +1,8 @@
 # API: CLI (факт) + HTTP (контракт M2) + отчёты
 
-> §1 — зеркало живого CLI (проверено `revo.py --help` и selftest 10/10, 2026-11-09).
-> §2 — контракт для АГЕНТА-СЕРВЕРА (M2): реализуешь ровно так, не выдумываешь.
+> §1 — зеркало живого CLI (проверено `revo.py --help` и selftest 12/12, 2026-11-09).
+> §2 — контракт M2: **реализован и принят 2026-11-09 (v1.1)** — смоук `tests/smoke_api.sh` PASS=18 FAIL=0,
+> живая браузерная приёмка M3 против этого сервера (скриншоты `demo/ui/`).
 > §3 — схемы машинных отчётов. Связка: [SPEC.md](../SPEC.md) · [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## 1. CLI-контракт `revo.py` (живое ядро)
@@ -21,7 +22,7 @@
 | `patterns` | `[-t TASK]` | библиотека архетипов / выбор мозга для задания | список или `→ имя (N зон)` |
 | `auto` | `[task]`, `--queue F`, `--outdir D`, `-b …`, `--attempts N` (3), `-s …` | полный автономный цикл: мозг→рендер→критик→рефайн | JSON-отчёт (§3.1+), кадр `pipeline_best.png` |
 | `autolog` | `[outdir=demo/auto]` | пересборка AUTO-LOG.md из `__run.json` | `saved: AUTO-LOG.md` |
-| `selftest` | — | 10 проверок ядра | `--- selftest 10/10`, exit 0/1 |
+| `selftest` | — | 12 проверок ядра и сервера | `--- selftest 12/12`, exit 0/1 |
 
 Примеры живого пути (все проверены 2026-11-09):
 ```bash
@@ -32,10 +33,16 @@ python3 revo.py pipeline layouts/datacenter.json --outdir /tmp/p -b offline
 python3 revo.py auto "караоке клуб, магента-неон" --outdir /tmp/a --backend offline
 ```
 
-## 2. HTTP-контракт `revo_server.py` (M2 — реализовать ровно так)
+## 2. HTTP-контракт `revo_server.py` (M2 — реализован, v1.1)
 
 База: `http://127.0.0.1:8400` · тело запросов — JSON · ответы — JSON, UTF-8.
-Раздача статики: `GET /` и `/app/*` отдают `app/`. CORS: `Access-Control-Allow-Origin: *` для localhost.
+Раздача статики: `GET /`, `/app/*` и корневые файлы (`/app.js`, `/app.css` — index.html ссылается
+относительно, это же требует file://-режим F-18) отдают `app/`. CORS: `Access-Control-Allow-Origin: *`,
+`OPTIONS` → 204.
+Умолчания реализации (v1.1): `backend` по умолчанию — `offline` (N-01); `/health.backend` отражает
+`detect_backend()` ядра (наличие z-ai CLI), но эндпоинты без явного backend всегда offline;
+`/api/compose` принимает опциональный `backend: offline|zai|auto`; ответы `pipeline/auto` несут
+доп. поле `outdir`; `GET /api/patterns?task=…` добавляет `pick`.
 
 | Метод+путь | Тело запроса | Ответ 200 | Ошибки |
 |---|---|---|---|
@@ -53,11 +60,13 @@ python3 revo.py auto "караоке клуб, магента-неон" --outdir
 | `GET /api/projects/<id>` [M4] | — | JSON проекта | 404 |
 | `POST /api/projects` [M4] | JSON проекта | `{"id": "…"}` | 400 |
 
-Все ошибки — машиночитаемо: `{"error": "тип", "detail": "…"}` (F-17). 404 на неизвестный путь,
-405 на чужой метод. Сервер не пишет на диск вне `projects/` и системного tmp.
+Все ошибки — машиночитаемо: `{"error": "тип", "detail": ["…"]}` (F-17, detail — список).
+404 на неизвестный путь, 405 на чужой метод, 400 payload_too_large при теле >128 МБ.
+Сервер не пишет на диск вне `projects/` (M4) и системного tmp.
 
-**Acceptance M2:** `tests/smoke_api.sh` — поднимает сервер, гоняет таблицу сверху,
-проверяет коды и схемы; exit 0 = фаза закрыта. Selftest расширяется до 12 (health + smoke).
+**Acceptance M2 (ЗАКРЫТО 2026-11-09):** `tests/smoke_api.sh` — **PASS=18 FAIL=0**
+(11 позитивов + 6 негативов + статика); selftest 12/12 (пр. 11 — SHA256-детерминизм offline-рендера,
+пр. 12 — сервер + `/health` 200); живая браузерная приёмка M3 против этого сервера — `demo/ui/`.
 
 ## 3. Машинные отчёты (числа никогда руками)
 

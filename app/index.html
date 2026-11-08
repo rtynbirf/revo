@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<meta name="color-scheme" content="dark">
+<title>REVO — редактор лейаута (M3)</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ===== ТУЛБАР ===== -->
+<header id="toolbar">
+  <div class="brand">REVO<span class="sub">layout → render</span></div>
+  <div class="tb-sep"></div>
+  <label class="tb-num">Полотно W<input id="cv-w" type="number" min="64" max="4096" step="1"></label>
+  <label class="tb-num">H<input id="cv-h" type="number" min="64" max="4096" step="1"></label>
+  <div class="tb-sep"></div>
+  <button id="btn-new" type="button" title="N — новая зона">+ Зона</button>
+  <button id="btn-del" type="button" title="Delete — удалить выбранную">− Зона</button>
+  <div class="tb-sep"></div>
+  <span class="tb-label">Цикл:</span>
+  <button id="btn-skeleton" type="button" title="POST /api/skeleton">Скелет</button>
+  <button id="btn-prompt" type="button" title="POST /api/prompt">Промпт</button>
+  <button id="btn-render" type="button" title="POST /api/render (offline|zai)">Рендер</button>
+  <button id="btn-critic" type="button" title="POST /api/critic (нужен рендер)">Критик</button>
+  <button id="btn-merge" type="button" title="POST /api/pipeline + локальная склейка">Склейка</button>
+  <select id="backend" title="Рендер-бэкенд">
+    <option value="offline">offline</option>
+    <option value="zai">zai</option>
+  </select>
+  <button id="btn-cycle" type="button" class="accent" title="Ctrl+Enter — весь цикл">Прогон</button>
+  <div class="tb-sep"></div>
+  <button id="btn-validate" type="button" title="POST /api/validate">Валидировать</button>
+  <button id="btn-export" type="button" title="Ctrl+E — скачать layout.json">Экспорт layout.json</button>
+  <label class="filebtn">Импорт<input id="file-import" type="file" accept=".json,application/json"></label>
+  <button id="btn-patterns" type="button" title="GET /api/patterns — библиотека архетипов">Паттерны</button>
+  <div class="tb-spacer"></div>
+  <button id="server-status" type="button" class="statusbtn" title="Проверить соединение с сервером">
+    <span id="server-dot" class="dot off"></span><span id="server-label">проверяю…</span>
+  </button>
+</header>
+
+<!-- ===== ОСНОВНАЯ ОБЛАСТЬ ===== -->
+<main>
+  <section id="left">
+    <div id="canvas-wrap">
+      <canvas id="cv" width="1280" height="720"></canvas>
+      <div id="demo-banner" hidden>Демо-режим file://: рендер локальный (канвас-эмуляция), полный рендер — через сервер (python3 revo_server.py)</div>
+      <div id="legend">
+        <span class="lg"><i style="background:#4ea8ff"></i>far</span>
+        <span class="lg"><i style="background:#b18cff"></i>mid</span>
+        <span class="lg"><i style="background:#ffb054"></i>near</span>
+        <span class="lg dim">координаты — в пикселях полотна layout.json</span>
+      </div>
+      <div id="canvas-hint">Перетащите по фону — новая зона · тяните зону — переместить · ручки — ресайз · Shift+клик — точка схода · 2×клик — role</div>
+    </div>
+
+    <!-- NL-инструкция поверх лейаута (F-21) -->
+    <div id="nl-panel">
+      <div class="nl-left">
+        <div class="nl-head">Инструкция словами поверх лейаута — POST /api/compose</div>
+        <div class="nl-inputrow">
+          <textarea id="nl-text" rows="2" placeholder="Например: ночной караоке-клуб, магента-неон и толпа на первом плане"></textarea>
+          <button id="btn-apply" type="button">Применить<br>инструкцию</button>
+        </div>
+        <div id="nl-note" class="small dim"></div>
+      </div>
+      <div class="nl-right">
+        <div class="nl-head">История инструкций (последняя сверху)</div>
+        <ol id="nl-history"></ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ИНСПЕКТОР ===== -->
+  <aside id="inspector">
+    <h2>Зона <span id="z-count" class="dim"></span></h2>
+    <fieldset id="zone-fields" disabled>
+      <label>ID (авто e1..eN, редактируемый)
+        <input id="z-id" type="text" spellcheck="false" autocomplete="off">
+      </label>
+      <label>Role — описание на EN (идёт в компилятор промпта как есть)
+        <input id="z-role" type="text" spellcheck="false" autocomplete="off" placeholder="teal LED wall glowing in the deep background">
+      </label>
+      <div class="insp-row"><span class="lab">Глубина z (1/2/3)</span>
+        <div class="zbtns">
+          <button id="z-far" type="button">far</button>
+          <button id="z-mid" type="button">mid</button>
+          <button id="z-near" type="button">near</button>
+        </div>
+      </div>
+      <div class="insp-row2">
+        <label>Color<input id="z-color" type="color" value="#888888"></label>
+        <label class="chk"><input id="z-glow" type="checkbox"> glow</label>
+      </div>
+      <div class="insp-row2 bbox">
+        <label>x0<input id="z-x0" type="number" step="1"></label>
+        <label>y0<input id="z-y0" type="number" step="1"></label>
+        <label>x1<input id="z-x1" type="number" step="1"></label>
+        <label>y1<input id="z-y1" type="number" step="1"></label>
+      </div>
+      <div id="z-real" class="mono dim small"></div>
+    </fieldset>
+
+    <h2>Сцена</h2>
+    <label>Mood<input id="s-mood" type="text" spellcheck="false" autocomplete="off"></label>
+    <label>Light<input id="s-light" type="text" spellcheck="false" autocomplete="off"></label>
+    <div class="insp-row palette">
+      <label>base<input id="p-base" type="color"></label>
+      <label>primary<input id="p-primary" type="color"></label>
+      <label>accent<input id="p-accent" type="color"></label>
+      <label>warm<input id="p-warm" type="color"></label>
+    </div>
+    <div class="insp-row2">
+      <label>Точка схода x (0..1)<input id="s-px" type="number" min="0" max="1" step="0.01"></label>
+      <label>Точка схода y (0..1)<input id="s-py" type="number" min="0" max="1" step="0.01"></label>
+    </div>
+    <div class="dim small">Shift+клик по канвасу — поставить точку схода</div>
+
+    <h2>Валидация</h2>
+    <button id="btn-validate2" type="button">Валидировать layout.json</button>
+    <div id="validate-out" class="mono small"></div>
+  </aside>
+</main>
+
+<!-- ===== ГАЛЕРЕЯ КАДРА (F-20) ===== -->
+<section id="gallery">
+  <div class="g-slot" id="g-skeleton">
+    <div class="g-head">Скелет</div>
+    <div class="g-body"><div class="g-empty">—</div></div>
+    <div class="g-caption"></div>
+  </div>
+  <div class="g-slot" id="g-render">
+    <div class="g-head">Рендер</div>
+    <div class="g-body"><div class="g-empty">—</div></div>
+    <div class="g-caption"></div>
+  </div>
+  <div class="g-slot" id="g-merge">
+    <div class="g-head">Склейка</div>
+    <div class="g-body"><div class="g-empty">—</div></div>
+    <div class="g-caption"></div>
+  </div>
+  <div class="g-slot g-text" id="g-prompt">
+    <div class="g-head">Промпт / текст</div>
+    <div class="g-body"><div class="g-empty">—</div></div>
+    <div class="g-caption"></div>
+  </div>
+  <div class="g-slot g-critic" id="g-critic">
+    <div class="g-head">Критик</div>
+    <div class="g-body"><div class="g-empty">—</div></div>
+    <div class="g-caption"></div>
+  </div>
+</section>
+
+<footer id="footer">REVO — открытая реставрация метода Reve (layout → render). v0.1 · M3</footer>
+
+<div id="toast"></div>
+<noscript><div style="padding:20px;color:#f87171">REVO требует включённый JavaScript.</div></noscript>
+<script src="app.js"></script>
+</body>
+</html>
