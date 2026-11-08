@@ -424,6 +424,44 @@ def validate(lay: dict) -> list:
     return errs
 
 
+# ------------------------------------------------------------------ M4 ----
+# Диф зон (F-22/F-21): сердце истории версий проектов. Чистая функция без IO —
+# одинаковые входы → одинаковый диф (детерминизм, как всё в REVO).
+_DIFF_FIELDS = ("bbox", "z", "role", "color", "glow")
+
+
+def diff_zones(old: dict, new: dict) -> dict:
+    """Диф двух лейаутов по зонам (id — якорь).
+
+    Возвращает машиночитаемый отчёт:
+      {"added": [id…], "removed": [id…],
+       "changed": [{"id": …, "fields": {поле: {"old": …, "new": …}}}],
+       "counts": {"old": N, "new": M}, "same": bool}
+    Сравниваются только канонические поля FORMAT.md §3 (+id); всё остальное
+    (image_ref, typography и прочие доп. поля v1.1+) в диф не входит.
+    """
+    old = (old or {}).get("elements") or []
+    new = (new or {}).get("elements") or []
+    om = {e.get("id"): e for e in old if isinstance(e, dict) and e.get("id")}
+    nm = {e.get("id"): e for e in new if isinstance(e, dict) and e.get("id")}
+    added = [e["id"] for e in new if isinstance(e, dict) and e.get("id") and e["id"] not in om]
+    removed = [e["id"] for e in old if isinstance(e, dict) and e.get("id") and e["id"] not in nm]
+    changed = []
+    for eid in nm:
+        if eid not in om:
+            continue
+        a, b = om[eid], nm[eid]
+        fields = {}
+        for f in _DIFF_FIELDS:
+            if a.get(f) != b.get(f):
+                fields[f] = {"old": a.get(f), "new": b.get(f)}
+        if fields:
+            changed.append({"id": eid, "fields": fields})
+    return {"added": added, "removed": removed, "changed": changed,
+            "counts": {"old": len(old), "new": len(new)},
+            "same": not (added or removed or changed)}
+
+
 def draw_skeleton(lay: dict, out: str) -> str:
     w, h = lay["canvas"]["w"], lay["canvas"]["h"]
     base = hex2rgb(lay.get("style", {}).get("palette", {}).get("base", "#0b0f1a"))
@@ -655,7 +693,7 @@ def autolog(outdir: str, outfile: str = "AUTO-LOG.md") -> str:
 def selftest() -> int:
     import tempfile
     ok = 0
-    total = 12  # 10 проверок ядра (M0/M1) + 2 проверки M2 (детерминизм N-02, сервер F-14)
+    total = 14  # 10 ядра (M0/M1) + 2 сервера M2 (N-02, F-14) + диф зон (M4) + цикл проектов M4
     tmp = tempfile.mkdtemp(prefix="revo-selftest-")
     good = {"canvas": {"w": 640, "h": 360},
             "style": {"palette": {"base": "#0b0f1a", "accent": "#14b8a6"}},
@@ -755,6 +793,93 @@ def selftest() -> int:
     print(("PASS" if ok12 else "FAIL"),
           f"12 revo_server.py /health → 200 и ok:true{' — ' + note12 if note12 else ''}")
     ok += ok12
+
+    # 13. диф зон (M4, F-22): добавление/удаление/изменение/без изменений — детерминизм
+    ok13, note13 = False, ""
+    try:
+        base = {"canvas": {"w": 640, "h": 360}, "elements": [
+            {"id": "a", "bbox": [10, 10, 300, 200], "z": "far", "color": "#14b8a6"},
+            {"id": "b", "bbox": [310, 10, 600, 200], "z": "mid"}]}
+        mod = {"canvas": {"w": 640, "h": 360}, "elements": [
+            {"id": "a", "bbox": [10, 10, 320, 200], "z": "far", "color": "#14b8a6"},
+            {"id": "c", "bbox": [5, 5, 100, 90], "z": "near"}]}
+        d1 = diff_zones(base, mod)
+        ok13 = (d1["added"] == ["c"] and d1["removed"] == ["b"]
+                and len(d1["changed"]) == 1 and d1["changed"][0]["id"] == "a"
+                and "bbox" in d1["changed"][0]["fields"] and not d1["same"]
+                and diff_zones(base, base)["same"]
+                and d1 == diff_zones(base, mod))  # детерминизм: тот же вход → тот же диф
+    except Exception as e:
+        note13 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok13 else "FAIL"),
+          f"13 диф зон: added/removed/changed/same + детерминизм{' — ' + note13 if note13 else ''}")
+    ok += ok13
+
+    # 14. цикл проектов M4 (F-22/F-23) против живого сервера: создать → версия → диф →
+    #     экспорт ZIP → импорт → сравнение 1:1 (SHA256 layout.json) — это и есть DoD M4
+    ok14, note14 = False, ""
+    try:
+        import socket
+        import time as _t
+        import urllib.request
+        srv = Path(__file__).resolve().parent / "revo_server.py"
+        pdir = Path(tmp) / "projects"
+        s = socket.socket(); s.bind(("127.0.0.1", 0)); port2 = s.getsockname()[1]; s.close()
+        proc = subprocess.Popen(
+            [sys.executable, str(srv), "--port", str(port2), "--projects-dir", str(pdir)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        def _call(path, payload=None):
+            data = None if payload is None else json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(f"http://127.0.0.1:{port2}{path}", data=data,
+                                         headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return r.status, r.read()
+        try:
+            deadline = _t.time() + 20
+            while _t.time() < deadline and proc.poll() is None:
+                try:
+                    _call("/health"); break
+                except Exception:
+                    _t.sleep(0.2)
+            st, body = _call("/api/projects", {"name": "smoke-m4", "layout": good})
+            pid = json.loads(body)["id"]
+            mod = {"canvas": {"w": 640, "h": 360}, "elements": [
+                {"id": "a", "bbox": [10, 10, 340, 210], "z": "far", "color": "#14b8a6"},
+                {"id": "b", "bbox": [310, 10, 600, 200], "z": "mid"},
+                {"id": "c", "bbox": [5, 5, 100, 90], "z": "near"}]}
+            st, body = _call(f"/api/projects/{pid}/versions", {"layout": mod, "source": "LLM"})
+            v2 = json.loads(body)
+            d2 = v2["diff"]
+            st, body = _call(f"/api/projects/{pid}/versions/2", None)
+            v2full = json.loads(body)
+            sha_src = hashlib.sha256(json.dumps(v2full["layout"], sort_keys=True).encode()).hexdigest()
+            st, zbytes = _call(f"/api/projects/{pid}/export", None)
+            ok_zip = zbytes[:4] == b"PK\x03\x04" and v2["n"] == 2 and d2["added"] == ["b", "c"] \
+                and not d2["removed"] and len(d2["changed"]) == 1
+            import base64 as _b64
+            st, body = _call("/api/projects/import",
+                             {"zip_base64": _b64.b64encode(zbytes).decode("ascii")})
+            imp = json.loads(body)
+            pid2, renamed = imp["id"], imp["renamed"]
+            st, body = _call(f"/api/projects/{pid2}/versions/2", None)
+            v2imp = json.loads(body)
+            sha_imp = hashlib.sha256(json.dumps(v2imp["layout"], sort_keys=True).encode()).hexdigest()
+            ok14 = bool(ok_zip and renamed and pid2 != pid and sha_src == sha_imp
+                        and v2imp["diff"] == v2["diff"] and v2imp["source"] == "LLM")
+            if not ok14:
+                note14 = (f"zip={ok_zip} renamed={renamed} sha_eq={sha_src == sha_imp} "
+                          f"diff_eq={v2imp.get('diff') == v2['diff']}")
+        finally:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
+            except Exception:
+                proc.kill()
+    except Exception as e:
+        note14 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok14 else "FAIL"),
+          f"14 M4: проект→версия+диф→экспорт ZIP→импорт→1:1 (SHA256 layout){' — ' + note14 if note14 else ''}")
+    ok += ok14
 
     print(f"--- selftest {ok}/{total}")
     return 0 if ok == total else 1

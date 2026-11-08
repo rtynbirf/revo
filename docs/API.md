@@ -1,8 +1,10 @@
 # API: CLI (факт) + HTTP (контракт M2) + отчёты
 
-> §1 — зеркало живого CLI (проверено `revo.py --help` и selftest 12/12, 2026-11-09).
-> §2 — контракт M2: **реализован и принят 2026-11-09 (v1.1)** — смоук `tests/smoke_api.sh` PASS=18 FAIL=0,
-> живая браузерная приёмка M3 против этого сервера (скриншоты `demo/ui/`).
+> §1 — зеркало живого CLI (проверено `revo.py --help` и selftest 14/14, 2026-11-09).
+> §2 — контракт M2: реализован и принят 2026-11-09 (v1.1) — смоук `tests/smoke_api.sh`;
+> **M4-проекты (v1.2): реализованы и приняты 2026-11-09** — смоук **PASS=34 FAIL=0** (15 новых
+> M4-проверок + 7 негативов), selftest-проверка 14 (проект→версия→диф→экспорт→импорт 1:1),
+> панель проектов в UI. Версия контракта в `/health`: `"api": 2` (правило ARCHITECTURE §4).
 > §3 — схемы машинных отчётов. Связка: [SPEC.md](../SPEC.md) · [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## 1. CLI-контракт `revo.py` (живое ядро)
@@ -22,7 +24,7 @@
 | `patterns` | `[-t TASK]` | библиотека архетипов / выбор мозга для задания | список или `→ имя (N зон)` |
 | `auto` | `[task]`, `--queue F`, `--outdir D`, `-b …`, `--attempts N` (3), `-s …` | полный автономный цикл: мозг→рендер→критик→рефайн | JSON-отчёт (§3.1+), кадр `pipeline_best.png` |
 | `autolog` | `[outdir=demo/auto]` | пересборка AUTO-LOG.md из `__run.json` | `saved: AUTO-LOG.md` |
-| `selftest` | — | 12 проверок ядра и сервера | `--- selftest 12/12`, exit 0/1 |
+| `selftest` | — | 14 проверок ядра, сервера и проектов | `--- selftest 14/14`, exit 0/1 |
 
 Примеры живого пути (все проверены 2026-11-09):
 ```bash
@@ -33,7 +35,7 @@ python3 revo.py pipeline layouts/datacenter.json --outdir /tmp/p -b offline
 python3 revo.py auto "караоке клуб, магента-неон" --outdir /tmp/a --backend offline
 ```
 
-## 2. HTTP-контракт `revo_server.py` (M2 — реализован, v1.1)
+## 2. HTTP-контракт `revo_server.py` (M2 — реализован v1.1; M4 — реализован v1.2)
 
 База: `http://127.0.0.1:8400` · тело запросов — JSON · ответы — JSON, UTF-8.
 Раздача статики: `GET /`, `/app/*` и корневые файлы (`/app.js`, `/app.css` — index.html ссылается
@@ -46,7 +48,7 @@ python3 revo.py auto "караоке клуб, магента-неон" --outdir
 
 | Метод+путь | Тело запроса | Ответ 200 | Ошибки |
 |---|---|---|---|
-| `GET /health` | — | `{"ok": true, "api": 1, "backend": "offline\|zai", "version": "…"}` | — |
+| `GET /health` | — | `{"ok": true, "api": 2, "backend": "offline\|zai", "version": "…"}` | — |
 | `POST /api/validate` | layout-объект | `{"valid": true, "errors": []}` | всегда 200; ошибки валидации — в `errors` |
 | `POST /api/compose` | `{"task": "...", "size": [1280,720]}` | `{"layout": {...}, "brain": "…", "errors": []}` | 400 при пустом task |
 | `POST /api/skeleton` | layout-объект | PNG-бинарник (`Content-Type: image/png`) | 400 + JSON ошибки валидации |
@@ -56,17 +58,34 @@ python3 revo.py auto "караоке клуб, магента-неон" --outdir
 | `POST /api/critic` | `{layout, "render_png_base64"}` | JSON-отчёт §3.1 | 400 |
 | `POST /api/auto` | `{"task": "...", "attempts": 3, "backend": "offline"}` | JSON-отчёт автоцикла | 400 |
 | `GET /api/patterns` | — | `{"patterns": [{"name","zones","kw":[…]}]}` | — |
-| `GET /api/projects` [M4] | — | `{"projects": [{"id","name","updated"}]}` | — |
-| `GET /api/projects/<id>` [M4] | — | JSON проекта | 404 |
-| `POST /api/projects` [M4] | JSON проекта | `{"id": "…"}` | 400 |
+| `GET /api/projects` | — | `{"projects": [{"id","name","updated","versions"}]}` (сортировка по updated) | — |
+| `POST /api/projects` | `{name?, layout, source?, note?, critic?, render_png_base64?}` | `{"id": "…", "n": 1}` (диф v1 — от пустоты) | 400 |
+| `GET /api/projects/<id>` | — | мета проекта: `{id,name,created,updated,versions:[{n,ts,source,note,diff,files}]}` | 404 `project_not_found` |
+| `GET /api/projects/<id>/versions/<n>` | — | полная версия: запись мета + `layout` + `critic?` + `render_png_base64?` | 404 / 400 |
+| `POST /api/projects/<id>/versions` | `{layout, source?, note?, critic?, render_png_base64?}` | `{"n": N, "diff": {…}}` — диф считает `revo.diff_zones` от последней версии | 400 |
+| `GET /api/projects/<id>/export` | — | ZIP `revo-project/v1`: `revo-project.json` + `v<n>/layout.json\|critic.json\|render.png`, `Content-Disposition: attachment` | 404 |
+| `POST /api/projects/import` | `{"zip_base64": "…"}` | `{"id", "renamed": bool, "versions": N}` — импорт НИКОГДА не перезаписывает существующий id | 400 `bad_zip\|bad_manifest\|invalid_layout\|bad_base64` |
+
+Диф зон (`diff`) — машиночитаемый отчёт `revo.diff_zones`: `{added:[id…], removed:[id…],
+changed:[{id, fields:{поле:{old,new}}}], counts:{old,new}, same:bool}` — канонические поля
+FORMAT.md §3; доп. поля v1.1+ в диф не входят.
+Хранение: `projects/<id>/project.json` + `v<n>/…` (формат и правила — [projects/README.md](../projects/README.md));
+id — `p-<ГГГГММДД>-<hex6>`; запись мета атомарна под замком; сервер пишет только в `projects/`
+(опция `--projects-dir` для selftest/тестов) и системный tmp; потолок истории — 200 версий;
+имена файлов внутри импортируемого ZIP проходят `_ZIP_ENTRY_RE` (`v<n>/<A-Za-z0-9._->`) —
+traversal исключён.
 
 Все ошибки — машиночитаемо: `{"error": "тип", "detail": ["…"]}` (F-17, detail — список).
 404 на неизвестный путь, 405 на чужой метод, 400 payload_too_large при теле >128 МБ.
-Сервер не пишет на диск вне `projects/` (M4) и системного tmp.
 
-**Acceptance M2 (ЗАКРЫТО 2026-11-09):** `tests/smoke_api.sh` — **PASS=18 FAIL=0**
-(11 позитивов + 6 негативов + статика); selftest 12/12 (пр. 11 — SHA256-детерминизм offline-рендера,
-пр. 12 — сервер + `/health` 200); живая браузерная приёмка M3 против этого сервера — `demo/ui/`.
+**Acceptance M2 (ЗАКРЫТО 2026-11-09):** `tests/smoke_api.sh` — 18 проверок; selftest 12/12;
+живая браузерная приёмка M3 против этого сервера — `demo/ui/`.
+
+**Acceptance M4 (ЗАКРЫТО 2026-11-09):** `tests/smoke_api.sh` — **PASS=34 FAIL=0**
+(9 M4-позитивов: пустой список → создание → мета → v1 → v2+диф → чтение → экспорт PK →
+импорт renamed → 1:1 SHA256; + негативы N7–N13: чужой проект/версия, битый layout, traversal,
+битый base64, не-ZIP); selftest **14/14** (пр. 13 — диф зон + детерминизм, пр. 14 — полный
+HTTP-цикл проектов с 1:1 после экспорт→импорт); панель проектов в UI (сервер + localStorage-режим).
 
 ## 3. Машинные отчёты (числа никогда руками)
 

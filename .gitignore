@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 demo/**/*__run.json.bak
 cover_art_raw.png
+
+# M4: файловые проекты живут локально, в git не идут (кроме README — описание формата)
+projects/*
+!projects/README.md

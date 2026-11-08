@@ -72,6 +72,26 @@
         <ol id="nl-history"></ol>
       </div>
     </div>
+    <!-- Проекты: история версий, дифы зон, экспорт/импорт (M4, F-22/F-23) -->
+    <div id="projects-panel">
+      <div class="prj-controls">
+        <span class="nl-head">Проекты (M4): версии · дифы зон · экспорт/импорт</span>
+        <input id="prj-name" type="text" placeholder="имя проекта" maxlength="120">
+        <input id="prj-note-text" type="text" placeholder="заметка к версии (необязательно)" maxlength="300">
+        <button id="btn-prj-new" type="button" title="Создать проект из текущего лейаута (v1)">Новый проект</button>
+        <button id="btn-prj-save" type="button" title="Сохранить текущий лейаут как новую версию — диф зон посчитает сервер">+ Версия</button>
+        <select id="prj-list" title="Список проектов (GET /api/projects)"><option value="">— проекты —</option></select>
+        <button id="btn-prj-open" type="button">Открыть</button>
+        <button id="btn-prj-reload" type="button" title="Обновить список проектов">⟳</button>
+        <button id="btn-prj-export" type="button" title="Сервер: ZIP revo-project/v1 · демо: JSON-манифест">Экспорт</button>
+        <label class="filebtn">Импорт<input id="file-prj-import" type="file" accept=".zip,.json,application/zip,application/json"></label>
+        <button id="btn-prj-clearhl" type="button" title="Убрать подсветку дифа с канваса">Снять подсветку</button>
+      </div>
+      <div class="prj-cols">
+        <ol id="prj-versions"></ol>
+        <div id="prj-note" class="small dim">Проект не открыт — «Новый проект» или выберите из списка. Без сервера — localStorage-режим (F-22); zip-импорт требует сервера.</div>
+      </div>
+    </div>
   </section>
 
   <!-- ===== ИНСПЕКТОР ===== -->

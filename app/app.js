@@ -47,6 +47,14 @@
     galleryUrls: new Map(),  // blob: URL по слотам (для revoke)
     history: loadHistory(),
     cycleRunning: false,
+    prj: {                   // M4: проекты (F-22/F-23)
+      list: [],              // [{id, name, updated, versions}]
+      current: null,         // id открытого проекта
+      meta: null,            // мета открытого проекта (список версий с дифами)
+      prevLayout: null,      // лейаут последней версии — база для следующего дифа/подсветки
+      highlight: { added: new Set(), changed: new Set() }, // подсветка дифа на канвасе (F-21)
+      lastCritic: null,      // последний отчёт критика — уходит в версию (F-22)
+    },
   };
 
   // ================= нормализация layout.json (парсер) =================
@@ -328,6 +336,9 @@
 
     // точка схода (perspective, FORMAT.md §5)
     drawVanishing(lay, s);
+
+    // подсветка дифа версий (M4/F-21): added — зелёный, changed — янтарный
+    drawDiffOverlay(s);
 
     // рамка выбранной зоны + ручки
     if (state.sel >= 0 && state.sel < lay.elements.length) drawSelection(lay.elements[state.sel].bbox, s);
@@ -758,6 +769,7 @@
     try {
       const b64 = await srcToBase64(r.src);
       const j = await apiJson("POST", "/api/critic", { layout: currentLayout(), render_png_base64: b64 });
+      state.prj.lastCritic = j; // M4: отчёт уйдёт в следующую сохранённую версию (F-22)
       renderCriticReport(j);
     } catch (e) {
       toast("Критик: " + e.message, "err");
@@ -935,6 +947,359 @@
       $("nl-note").textContent = "Ошибка compose: " + e.message;
       toast("compose: " + e.message, "err");
     }
+  }
+
+  // ================= M4: ПРОЕКТЫ (F-22/F-23) =================
+  // Сервер: файловый бэкенд /api/projects (docs/API.md §2) — полный F-22:
+  // версии + дифы (revo.diff_zones на сервере) + рендеры + отчёты критика, ZIP F-23.
+  // Демо (file://): localStorage «revo.m4.projects.v1» — та же модель, честные пометки;
+  // zip-импорт в демо невозможен без библиотеки — импортируется JSON-манифест.
+  const LS_KEY = "revo.m4.projects.v1";
+
+  function lsRead() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || { projects: {} }; }
+    catch (e) { return { projects: {} }; }
+  }
+  function lsWrite(db) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(db)); }
+    catch (e) { prjNote("localStorage недоступен (file://) — проект живёт до перезагрузки страницы", "warn"); }
+  }
+  function lsNow() { return new Date().toISOString().replace("T", " ").slice(0, 19) + "Z"; }
+
+  // Зеркало revo.diff_zones (ядро) для демо-режима: канонические поля FORMAT.md §3.
+  // Сервер всегда считает диф сам — это подстраховка для мгновенной подсветки и file://.
+  function localDiffZones(oldLay, newLay) {
+    const FIELDS = ["bbox", "z", "role", "color", "glow"];
+    const idx = (lay) => {
+      const m = new Map();
+      ((lay && lay.elements) || []).forEach((e) => { if (e && e.id) m.set(e.id, e); });
+      return m;
+    };
+    const om = idx(oldLay), nm = idx(newLay);
+    const added = [...nm.keys()].filter((k) => !om.has(k));
+    const removed = [...om.keys()].filter((k) => !nm.has(k));
+    const changed = [];
+    for (const [k, e] of nm) {
+      const a = om.get(k);
+      if (!a) continue;
+      const fields = {};
+      for (const f of FIELDS)
+        if (JSON.stringify(a[f]) !== JSON.stringify(e[f])) fields[f] = { old: a[f], new: e[f] };
+      if (Object.keys(fields).length) changed.push({ id: k, fields });
+    }
+    return { added, removed, changed, counts: { old: om.size, new: nm.size },
+             same: !(added.length || removed.length || changed.length) };
+  }
+
+  function prjNote(msg, cls) {
+    const el = $("prj-note");
+    el.textContent = msg;
+    el.className = "small " + (cls || "dim");
+  }
+
+  function diffBrief(d) {
+    if (!d) return "";
+    const ch = (d.changed || []).length;
+    const parts = [];
+    if ((d.added || []).length) parts.push("+" + d.added.length);
+    if ((d.removed || []).length) parts.push("−" + d.removed.length);
+    if (ch) parts.push("±" + ch);
+    return parts.join(" ") || "без изменений";
+  }
+
+  function setHighlight(diff) {
+    state.prj.highlight.added = new Set((diff && diff.added) || []);
+    state.prj.highlight.changed = new Set((diff && diff.changed || []).map((c) => c.id));
+    renderCanvas();
+  }
+  function prjClearHighlight() {
+    state.prj.highlight.added = new Set();
+    state.prj.highlight.changed = new Set();
+    renderCanvas();
+  }
+
+  function drawDiffOverlay(s) {
+    const hl = state.prj && state.prj.highlight;
+    if (!hl || (!hl.added.size && !hl.changed.size)) return;
+    ctx.save();
+    ctx.setLineDash([7 / s, 5 / s]);
+    ctx.lineWidth = 2.2 / s;
+    for (const e of state.layout.elements) {
+      let color = null;
+      if (hl.added.has(e.id)) color = "rgba(52,211,153,.95)";       // --ok
+      else if (hl.changed.has(e.id)) color = "rgba(251,191,36,.95)"; // --warn
+      if (!color) continue;
+      ctx.strokeStyle = color;
+      ctx.strokeRect(e.bbox[0] - 2, e.bbox[1] - 2, e.bbox[2] - e.bbox[0] + 4, e.bbox[3] - e.bbox[1] + 4);
+    }
+    ctx.restore();
+  }
+
+  function renderProjects() {
+    const sel = $("prj-list");
+    const cur = sel.value;
+    sel.innerHTML = "";
+    const o0 = document.createElement("option");
+    o0.value = ""; o0.textContent = "— проекты (" + state.prj.list.length + ") —";
+    sel.appendChild(o0);
+    for (const p of state.prj.list) {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.name + " · v" + p.versions;
+      sel.appendChild(o);
+    }
+    if (cur && state.prj.list.some((p) => p.id === cur)) sel.value = cur;
+    else if (state.prj.current) sel.value = state.prj.current;
+  }
+
+  function renderVersions() {
+    const ol = $("prj-versions");
+    ol.innerHTML = "";
+    const meta = state.prj.meta;
+    if (!meta || !meta.versions) return;
+    for (const v of [...meta.versions].reverse()) {
+      const li = document.createElement("li");
+      li.className = "prj-ver";
+      li.title = "Открыть версию v" + v.n + " в редакторе";
+      const t = document.createElement("span"); t.className = "h-time"; t.textContent = "v" + v.n;
+      const src = document.createElement("span"); src.className = "prj-src"; src.textContent = v.source || "?";
+      const df = document.createElement("span"); df.className = "prj-diff"; df.textContent = diffBrief(v.diff);
+      const nt = document.createElement("span"); nt.className = "prj-note-text"; nt.textContent = v.note || "";
+      li.appendChild(t); li.appendChild(src); li.appendChild(df); li.appendChild(nt);
+      if ((v.diff && v.diff.added || []).length || (v.diff && v.diff.changed || []).length)
+        li.classList.add("has-diff");
+      li.addEventListener("click", () => prjLoadVersion(v.n));
+      ol.appendChild(li);
+    }
+  }
+
+  async function prjRefresh() {
+    if (state.server.ok) {
+      const j = await apiJson("GET", "/api/projects");
+      state.prj.list = (j && j.projects) || [];
+    } else {
+      const db = lsRead();
+      state.prj.list = Object.values(db.projects)
+        .map((p) => ({ id: p.id, name: p.name, updated: p.updated, versions: (p.versions || []).length }))
+        .sort((a, b) => (a.updated < b.updated ? 1 : -1));
+    }
+    renderProjects();
+  }
+
+  async function prjCreate() {
+    const name = ($("prj-name").value.trim()) || ("Проект " + new Date().toLocaleString("ru-RU"));
+    const lay = currentLayout();
+    if (!state.server.ok) {
+      const db = lsRead();
+      const id = "local-" + Date.now().toString(36);
+      db.projects[id] = {
+        id, name, created: lsNow(), updated: lsNow(),
+        versions: [{ n: 1, ts: lsNow(), source: "рука", note: "создан в демо-режиме",
+                     diff: localDiffZones({ elements: [] }, lay), files: ["layout.json"], layout: lay }],
+      };
+      lsWrite(db);
+      state.prj.current = id;
+      state.prj.meta = db.projects[id];
+      state.prj.prevLayout = lay;
+      $("prj-name").value = name;
+      await prjRefresh();
+      renderVersions();
+      prjNote("Демо-режим: проект в localStorage этого браузера (F-22). Сервер добавит рендеры, критика и zip-экспорт.", "warn");
+      toast("Проект создан (localStorage): " + name, "ok");
+      return;
+    }
+    try {
+      const body = { name, layout: lay, source: "рука", note: "создан в редакторе" };
+      if (state.gallery.render) body.render_png_base64 = await srcToBase64(state.gallery.render.src);
+      if (state.prj.lastCritic) body.critic = state.prj.lastCritic;
+      const j = await apiJson("POST", "/api/projects", body);
+      state.prj.current = j.id;
+      $("prj-name").value = name;
+      await prjRefresh();
+      await prjOpen(j.id);
+      toast("Проект создан: " + name + " — v1 на сервере", "ok");
+    } catch (e) { toast("Проект: " + e.message, "err"); }
+  }
+
+  async function prjSaveVersion() {
+    const id = state.prj.current;
+    if (!id) { toast("Сначала создайте или откройте проект", "warn"); return; }
+    const lay = currentLayout();
+    const note = ($("prj-note-text").value || "").trim();
+    if (!state.server.ok) {
+      const db = lsRead();
+      const p = db.projects[id];
+      if (!p) { toast("Проект не найден в localStorage", "err"); return; }
+      const diff = localDiffZones(state.prj.prevLayout, lay);
+      const n = p.versions[p.versions.length - 1].n + 1;
+      p.versions.push({ n, ts: lsNow(), source: "рука", note, diff, files: ["layout.json"], layout: lay });
+      p.updated = lsNow();
+      lsWrite(db);
+      state.prj.meta = p;
+      state.prj.prevLayout = lay;
+      renderVersions();
+      setHighlight(diff);
+      prjNote("Демо: версия v" + n + " в localStorage · диф: " + diffBrief(diff), "warn");
+      toast("Версия v" + n + " сохранена (демо)", "ok");
+      return;
+    }
+    try {
+      const body = { layout: lay, source: "рука", note };
+      if (state.gallery.render) body.render_png_base64 = await srcToBase64(state.gallery.render.src);
+      if (state.prj.lastCritic) body.critic = state.prj.lastCritic;
+      const j = await apiJson("POST", "/api/projects/" + encodeURIComponent(id) + "/versions", body);
+      state.prj.prevLayout = lay;
+      setHighlight(j.diff);
+      await prjRefresh(); // счётчик версий в списке проектов — свежим (числа — из API)
+      await prjOpen(id); // перечитать мету с сервера (источник правды)
+      prjNote("Сохранено: v" + j.n + " · диф: " + diffBrief(j.diff) + " · подсветка на канвасе (F-21)");
+      toast("Версия v" + j.n + " сохранена · " + diffBrief(j.diff), "ok");
+    } catch (e) { toast("Версия: " + e.message, "err"); }
+  }
+
+  async function prjLoadVersion(n) {
+    const id = state.prj.current;
+    if (!id) return;
+    try {
+      let lay, diff;
+      if (state.server.ok) {
+        const v = await apiJson("GET", "/api/projects/" + encodeURIComponent(id) + "/versions/" + n);
+        lay = v.layout; diff = v.diff;
+        prjNote("Открыта v" + n + " (" + v.source + (v.note ? " · " + v.note : "") + ") · диф: " + diffBrief(diff)
+                + " · зелёный = новые зоны, янтарный = изменённые (F-21)");
+      } else {
+        const v = (lsRead().projects[id] || { versions: [] }).versions.find((x) => x.n === n);
+        if (!v) { toast("v" + n + " не найдена", "err"); return; }
+        lay = v.layout; diff = v.diff;
+        prjNote("Демо: открыта v" + n + " из localStorage · диф: " + diffBrief(diff), "warn");
+      }
+      const res = normalizeLayout(lay);
+      state.layout = res.lay;
+      state.sel = -1;
+      state.prj.prevLayout = res.lay;
+      setHighlight(diff);
+      refreshAll();
+    } catch (e) { toast("Версия: " + e.message, "err"); }
+  }
+
+  async function prjOpen(id) {
+    if (!id) return;
+    try {
+      if (!state.server.ok) {
+        const p = lsRead().projects[id];
+        if (!p) { toast("Проект не найден", "err"); return; }
+        state.prj.current = id;
+        state.prj.meta = p;
+        const last = p.versions[p.versions.length - 1];
+        const res = normalizeLayout(last.layout);
+        state.layout = res.lay;
+        state.prj.prevLayout = res.lay;
+        $("prj-name").value = p.name;
+        prjClearHighlight();
+        refreshAll(); renderVersions();
+        prjNote("Демо: открыт «" + p.name + "» · " + p.versions.length + " верс. · localStorage (F-22)", "warn");
+        return;
+      }
+      const meta = await apiJson("GET", "/api/projects/" + encodeURIComponent(id));
+      state.prj.current = id;
+      state.prj.meta = meta;
+      $("prj-name").value = meta.name || "";
+      if (meta.versions.length) {
+        const v = await apiJson("GET", "/api/projects/" + encodeURIComponent(id)
+                                + "/versions/" + meta.versions[meta.versions.length - 1].n);
+        const res = normalizeLayout(v.layout);
+        state.layout = res.lay;
+        state.prj.prevLayout = res.lay;
+        prjNote("Открыт «" + meta.name + "» · версий: " + meta.versions.length
+                + " · загружена последняя v" + v.n + " (" + v.source + ")");
+      } else prjNote("Открыт «" + meta.name + "» — версий пока нет");
+      prjClearHighlight();
+      refreshAll(); renderVersions();
+    } catch (e) {
+      toast("Открыть: " + e.message, "err");
+      prjRefresh().catch(() => {});
+    }
+  }
+
+  function downloadBlob(blob, name) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  async function prjExport() {
+    const id = state.prj.current;
+    if (!id) { toast("Откройте проект для экспорта", "warn"); return; }
+    try {
+      if (state.server.ok) {
+        const b = await apiBlob("GET", "/api/projects/" + encodeURIComponent(id) + "/export");
+        downloadBlob(b, "revo-project-" + id + ".zip");
+        toast("Экспорт ZIP: revo-project-" + id + ".zip (revo-project/v1)", "ok");
+      } else {
+        const p = lsRead().projects[id];
+        if (!p) { toast("Проект не найден", "err"); return; }
+        const man = {
+          format: "revo-project/v1", exported: lsNow(),
+          id: p.id, name: p.name, created: p.created, updated: p.updated,
+          versions: p.versions.map((v) => ({ n: v.n, ts: v.ts, source: v.source, note: v.note, diff: v.diff, files: v.files })),
+          vData: p.versions.reduce((acc, v) => { acc["v" + v.n] = { layout: v.layout }; return acc; }, {}),
+        };
+        downloadBlob(new Blob([JSON.stringify(man, null, 2)], { type: "application/json" }),
+                     "revo-project-" + id + ".json");
+        prjNote("Демо-экспорт: JSON-манифест (layout.json + история). ZIP — через сервер (F-23).", "warn");
+        toast("Экспорт JSON-манифеста готов", "ok");
+      }
+    } catch (e) { toast("Экспорт: " + e.message, "err"); }
+  }
+
+  function fileToB64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result).split(",")[1] || "");
+      r.onerror = () => rej(new Error("файл не читается"));
+      r.readAsDataURL(file);
+    });
+  }
+
+  async function prjImport(file) {
+    try {
+      const isZip = /\.zip$/i.test(file.name) || file.type === "application/zip";
+      const isJson = /\.json$/i.test(file.name) || file.type === "application/json";
+      if (isZip) {
+        if (!state.server.ok) {
+          toast("ZIP-импорт — только с сервером; в демо импортируйте JSON-манифест (Экспорт в демо даёт JSON)", "warn");
+          return;
+        }
+        const j = await apiJson("POST", "/api/projects/import", { zip_base64: await fileToB64(file) });
+        await prjRefresh();
+        await prjOpen(j.id);
+        toast(j.renamed
+              ? "Импорт: исходный id занят — проект получил новый id " + j.id + " (" + j.versions + " верс.)"
+              : "Импорт: " + j.id + " (" + j.versions + " верс.)", "ok");
+      } else if (isJson) {
+        const man = JSON.parse(await file.text());
+        if (man.format !== "revo-project/v1" || !man.vData) {
+          toast("Это не манифест revo-project/v1 — демо-импорт ждёт JSON от демо-экспорта", "err");
+          return;
+        }
+        const db = lsRead();
+        const id = "local-" + Date.now().toString(36);
+        const versions = (man.versions || []).map((v) => {
+          const vd = (man.vData["v" + v.n]) || {};
+          return Object.assign({}, v, { layout: vd.layout });
+        }).filter((v) => v.layout);
+        if (!versions.length) { toast("в манифесте нет ни одной версии с layout", "err"); return; }
+        db.projects[id] = { id, name: (man.name || "Импорт") + " (импорт)", created: lsNow(), updated: lsNow(), versions };
+        lsWrite(db);
+        await prjRefresh();
+        await prjOpen(id);
+        toast("Импорт в localStorage: " + id + " (" + versions.length + " верс.)", "ok");
+      } else {
+        toast("Жду .zip (сервер) или .json (демо-манифест)", "warn");
+      }
+    } catch (e) { toast("Импорт: " + e.message, "err"); }
   }
 
   // ================= валидация / экспорт / импорт / паттерны =================
@@ -1217,6 +1582,19 @@
     });
     $("btn-patterns").addEventListener("click", doPatterns);
     $("btn-apply").addEventListener("click", applyInstruction);
+    // M4: проекты
+    $("btn-prj-new").addEventListener("click", prjCreate);
+    $("btn-prj-save").addEventListener("click", prjSaveVersion);
+    $("btn-prj-open").addEventListener("click", () => prjOpen($("prj-list").value));
+    $("prj-list").addEventListener("change", () => { if ($("prj-list").value) prjOpen($("prj-list").value); });
+    $("btn-prj-reload").addEventListener("click", () => prjRefresh().catch((e) => toast("Список: " + e.message, "err")));
+    $("btn-prj-export").addEventListener("click", prjExport);
+    $("btn-prj-clearhl").addEventListener("click", prjClearHighlight);
+    $("file-prj-import").addEventListener("change", (ev) => {
+      const f = ev.target.files && ev.target.files[0];
+      if (f) prjImport(f);
+      ev.target.value = "";
+    });
     $("server-status").addEventListener("click", () => {
       toast("Проверяю сервер…", "");
       detectServer();
@@ -1324,7 +1702,7 @@
     bindEvents();
     renderHistory();
     refreshAll();
-    detectServer();
+    detectServer().finally(() => { prjRefresh().catch(() => {}); });
   }
 
   // тестовый хук (node: парсер/валидатор проверяются без DOM)

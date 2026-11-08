@@ -79,7 +79,8 @@ revo/
 |---|---|---|
 | `layout.json` v1 поля и правила | [FORMAT.md](FORMAT.md) = `validate()` 1:1 | коммит с обновлением FORMAT + selftest + демо |
 | CLI-подкоманды и флаги | [API.md](API.md) §1 = `main()` 1:1 | то же; удаление подкоманды запрещено без ROADMAP-записи (урок M1.5: `pipeline` потеряли и вернули) |
-| HTTP JSON | [API.md](API.md) §2 (M2) | версия поля `api` в `/health` |
+| HTTP JSON | [API.md](API.md) §2 (M2+M4) | версия поля `api` в `/health` (v2: +проекты M4) |
+| Формат проекта revo-project/v1 | [projects/README.md](../projects/README.md) + API.md §2 | только расширение полей манифеста; импорт никогда не перезаписывает |
 | `__run.json` / авто-отчёты | [API.md](API.md) §3 | только расширение полей, не переименование |
 | CI-клетка | `.github/workflows/auto-pilot.yml` | изменение cron/веток — отдельным коммитом с обоснованием |
 

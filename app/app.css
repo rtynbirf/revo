@@ -192,3 +192,33 @@ main{display:flex;min-height:0}
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:#262f3f;border-radius:4px}
 ::-webkit-scrollbar-track{background:transparent}
+
+/* ===== M4: проекты (F-22/F-23) ===== */
+#projects-panel{
+  margin:0 10px 8px;padding:8px 10px;flex:none;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+}
+.prj-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.prj-controls .nl-head{margin-right:6px}
+.prj-controls input[type="text"]{
+  background:var(--panel2);border:1px solid var(--line2);border-radius:6px;
+  padding:4px 8px;min-width:130px;font-size:12px;
+}
+#prj-name{width:170px}
+#prj-note-text{flex:1;min-width:150px}
+.prj-cols{display:flex;gap:14px;align-items:flex-start;margin-top:6px}
+#prj-versions{
+  list-style:none;margin:0;padding:0;flex:1;min-width:260px;
+  display:flex;flex-direction:column-reverse;gap:2px;max-height:96px;overflow-y:auto;
+}
+.prj-ver{
+  display:flex;align-items:baseline;gap:8px;padding:2px 6px;border-radius:5px;
+  cursor:pointer;font-size:11.5px;font-family:var(--mono);
+}
+.prj-ver:hover{background:var(--panel2)}
+.prj-ver.has-diff{border-left:2px solid var(--warn)}
+.prj-ver .h-time{color:var(--accent);flex:none}
+.prj-src{color:var(--dim);flex:none;min-width:44px}
+.prj-diff{color:var(--warn);flex:none}
+.prj-note-text{color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+#prj-note{flex:1.4;min-width:220px;padding-top:3px}

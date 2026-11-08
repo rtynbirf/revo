@@ -5,4 +5,5 @@
 > Метод: docs/METHOD.md. Лицензия: MIT. Хозяин: rtynbirf.
 > МИССИЯ: восстановление закрытого app.reve.com как открытой системы — ТЗ: SPEC.md, план: ROADMAP.md, карта оригинала: docs/RESTORE-APP.md, контракты: docs/FORMAT.md + docs/API.md, слои: docs/ARCHITECTURE.md, парити: docs/PARITY.md.
 > M2: revo_server.py (только stdlib) — REST API + раздача UI, смоук tests/smoke_api.sh (18/0). M3: app/ — редактор лейаута, SPA без сборки, file://-демо; приёмка: demo/ui/ 2026-11-09.
+> M4: проекты — история версий с дифами зон (revo.diff_zones), подсветка дифа на канвасе, экспорт/импорт ZIP revo-project/v1 (1:1 по SHA256); /api/projects v1.2, смоук 34/0, selftest 14/14.
 > Судьба оригинала: генерация остановлена 2026-09-27, аккаунты закрыты 2026-10-31; веса моделей публично не существуют — восстанавливаем функциональный паритет на offline-first рельсах.
