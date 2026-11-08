@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-08T18:49:56+00:00",
+  "task": "неоновый мегаполис после дождя, отражения в асфальте",
+  "brain": "cyber-city",
+  "backend": "offline",
+  "attempts": 1,
+  "best_attempt": 1,
+  "score": 7.98,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-08/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-08/skeleton.png",
+  "layout_elements": 5
+}

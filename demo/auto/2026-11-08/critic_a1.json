@@ -1,0 +1,57 @@
+{
+  "overall": 7.98,
+  "zones": [
+    {
+      "id": "towers-far",
+      "score": 0.82,
+      "mean_rgb": [
+        43,
+        58,
+        75
+      ],
+      "detail_std": 31.7
+    },
+    {
+      "id": "signs-left",
+      "score": 0.766,
+      "mean_rgb": [
+        188,
+        52,
+        78
+      ],
+      "detail_std": 5.6
+    },
+    {
+      "id": "signs-right",
+      "score": 0.767,
+      "mean_rgb": [
+        8,
+        142,
+        167
+      ],
+      "detail_std": 5.7
+    },
+    {
+      "id": "street",
+      "score": 0.895,
+      "mean_rgb": [
+        36,
+        39,
+        39
+      ],
+      "detail_std": 44.8
+    },
+    {
+      "id": "figure",
+      "score": 0.74,
+      "mean_rgb": [
+        246,
+        187,
+        36
+      ],
+      "detail_std": 5.2
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}
