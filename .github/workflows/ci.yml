@@ -21,7 +21,7 @@ jobs:
           python-version: "3.11"
       - name: Install kernel deps (Pillow only)
         run: pip install -r requirements.txt
-      - name: Selftest (9 проверок ядра)
+      - name: Selftest (10 проверок ядра)
         run: python3 revo.py selftest
       - name: Patterns library intact
         run: python3 revo.py patterns

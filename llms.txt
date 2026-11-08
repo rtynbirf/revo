@@ -3,3 +3,5 @@
 > Демо-прогоны 2026-11-09: demo/datacenter, demo/karaoke-stage (оба бэкенда).
 > Серия RTYNBIRF LABS №26. Соседи: polymath-gen (полный медиа-агент), rtynbirf/rtynbirf (cells), polimat-hub (сверки роя).
 > Метод: docs/METHOD.md. Лицензия: MIT. Хозяин: rtynbirf.
+> МИССИЯ: восстановление закрытого app.reve.com как открытой системы — ТЗ: SPEC.md, план: ROADMAP.md, карта оригинала: docs/RESTORE-APP.md, контракты: docs/FORMAT.md + docs/API.md, слои: docs/ARCHITECTURE.md.
+> Судьба оригинала: генерация остановлена 2026-09-27, аккаунты закрыты 2026-10-31; веса моделей публично не существуют — восстанавливаем функциональный паритет на offline-first рельсах.

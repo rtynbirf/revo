@@ -538,6 +538,33 @@ def merge(a_path: str, b_path: str, out: str,
     return out
 
 
+def run_pipeline(lay_path: str, outdir: str, backend: str | None = None,
+                 size: str = "1344x768") -> dict:
+    """v1-режим одним вызовом: layout → skeleton + prompt + render + merge + отчёт."""
+    lay = load_layout(lay_path)
+    od = Path(outdir)
+    od.mkdir(parents=True, exist_ok=True)
+    stem = Path(lay_path).stem
+    sk = draw_skeleton(lay, str(od / f"{stem}__skeleton.png"))
+    pr = compile_prompt(lay)
+    (od / f"{stem}__prompt.txt").write_text(pr, encoding="utf-8")
+    be = backend or detect_backend()
+    if be == "zai":
+        rp = render_zai(lay, str(od / f"{stem}__render_zai.png"), size, pr)
+    else:
+        rp = render_offline(lay, str(od / f"{stem}__render_offline.png"))
+    mg = merge(sk, rp, str(od / f"{stem}__pipeline_{be}.png"))
+    rep = {
+        "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "layout": lay_path, "backend": be, "canvas": [lay["canvas"]["w"], lay["canvas"]["h"]],
+        "layout_elements": len(lay["elements"]),
+        "skeleton": sk, "prompt": pr, "render": rp, "pipeline": mg,
+    }
+    (od / f"{stem}__run.json").write_text(json.dumps(rep, ensure_ascii=False, indent=2),
+                                          encoding="utf-8")
+    return rep
+
+
 # ================================================================ АВТОПИЛОТ ==
 
 def detect_backend() -> str:
@@ -628,7 +655,7 @@ def autolog(outdir: str, outfile: str = "AUTO-LOG.md") -> str:
 def selftest() -> int:
     import tempfile
     ok = 0
-    total = 9
+    total = 10
     tmp = tempfile.mkdtemp(prefix="revo-selftest-")
     good = {"canvas": {"w": 640, "h": 360},
             "style": {"palette": {"base": "#0b0f1a", "accent": "#14b8a6"}},
@@ -665,6 +692,13 @@ def selftest() -> int:
     out = autolog(f"{tmp}/empty-nope", f"{tmp}/AUTO-LOG.md")
     print(("PASS" if Path(out).exists() else "FAIL"), "9 autolog рождается из пустоты")
     ok += Path(out).exists()
+    glp = Path(tmp) / "pipe_layout.json"
+    glp.write_text(json.dumps(good), encoding="utf-8")
+    rep = run_pipeline(str(glp), f"{tmp}/pipe", "offline")
+    pipe_ok = (all(Path(rep[k]).exists() for k in ("skeleton", "render", "pipeline"))
+               and isinstance(rep["prompt"], str) and len(rep["prompt"]) > 50)
+    print(("PASS" if pipe_ok else "FAIL"), "10 pipeline v1-режим одним вызовом")
+    ok += pipe_ok
     print(f"--- selftest {ok}/{total}")
     return 0 if ok == total else 1
 
@@ -681,6 +715,9 @@ def main(argv=None):
     p = sub.add_parser("compose"); p.add_argument("task"); p.add_argument("-o", "--out", required=True)
     p.add_argument("--size", default="1280x720")
     p = sub.add_parser("render"); p.add_argument("layout"); p.add_argument("-o", "--out", required=True)
+    p.add_argument("-b", "--backend", choices=["offline", "zai"], default=None)
+    p.add_argument("-s", "--size", default="1344x768")
+    p = sub.add_parser("pipeline"); p.add_argument("layout"); p.add_argument("--outdir", required=True)
     p.add_argument("-b", "--backend", choices=["offline", "zai"], default=None)
     p.add_argument("-s", "--size", default="1344x768")
     p = sub.add_parser("merge"); p.add_argument("a"); p.add_argument("b"); p.add_argument("-o", "--out", required=True)
@@ -717,8 +754,14 @@ def main(argv=None):
         print(f"brain={brain} → {args.out} {'VALID ✓' if not errs else 'INVALID: ' + '; '.join(errs)}")
         sys.exit(0 if not errs else 2)
     elif args.cmd == "render":
-        fn = render_zai if (args.backend or detect_backend()) == "zai" else render_offline
-        print("saved:", fn(load_layout(args.layout), args.out, args.size))
+        lay_r = load_layout(args.layout)
+        if (args.backend or detect_backend()) == "zai":
+            print("saved:", render_zai(lay_r, args.out, args.size))
+        else:
+            print("saved:", render_offline(lay_r, args.out))
+    elif args.cmd == "pipeline":
+        print(json.dumps(run_pipeline(args.layout, args.outdir, args.backend, args.size),
+                         ensure_ascii=False, indent=2))
     elif args.cmd == "merge":
         print("saved:", merge(args.a, args.b, args.out))
     elif args.cmd == "critic":
