@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+demo/**/*__run.json.bak
+cover_art_raw.png

@@ -1,0 +1,5 @@
+> REVO — runnable-прототип метода Reve: layout (структура сцены) → render (картинка из структуры).
+> Ядро: revo.py (validate → skeleton → prompt → render offline/zai → merge). Сцены: layouts/*.json.
+> Демо-прогоны 2026-11-09: demo/datacenter, demo/karaoke-stage (оба бэкенда).
+> Серия RTYNBIRF LABS №26. Соседи: polymath-gen (полный медиа-агент), rtynbirf/rtynbirf (cells), polimat-hub (сверки роя).
+> Метод: docs/METHOD.md. Лицензия: MIT. Хозяин: rtynbirf.

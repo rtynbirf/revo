@@ -1,0 +1,8 @@
+{
+  "layout": "layouts/datacenter.json",
+  "backend": "zai",
+  "skeleton": "demo/datacenter/datacenter__skeleton.png",
+  "render": "demo/datacenter/datacenter__render_zai.png",
+  "pipeline": "demo/datacenter/datacenter__pipeline_zai.png",
+  "prompt_chars": 1067
+}

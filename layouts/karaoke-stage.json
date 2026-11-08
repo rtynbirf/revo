@@ -1,0 +1,23 @@
+{
+  "canvas": { "w": 1280, "h": 720 },
+  "style": {
+    "mood": "photorealistic cinematic shot of an underground karaoke stage, 64 songs energy",
+    "palette": { "base": "#120b1c", "primary": "#a855f7", "accent": "#ec4899", "warm": "#fbbf24" },
+    "light": "violet and magenta neon wash, warm spotlight cone on the microphone, haze in the air, LED lyric glow reflecting on the floor",
+    "perspective": [0.5, 0.55]
+  },
+  "elements": [
+    { "id": "lyric-screen", "bbox": [240, 60, 1040, 330], "z": "far",
+      "role": "huge glowing karaoke lyric screen with large luminous words", "color": "#a855f7", "glow": true },
+    { "id": "stage",        "bbox": [80, 330, 1200, 560], "z": "mid",
+      "role": "wide dark stage platform with edge neon strip", "color": "#ec4899" },
+    { "id": "spotlight",    "bbox": [520, 40, 760, 380], "z": "mid",
+      "role": "warm spotlight cone cutting through the haze onto the singer spot", "color": "#fbbf24", "glow": true },
+    { "id": "microphone",   "bbox": [600, 350, 680, 520], "z": "near",
+      "role": "vintage microphone on a stand at the center of the stage", "color": "#fbbf24" },
+    { "id": "crowd",        "bbox": [0, 560, 1280, 720], "z": "near",
+      "role": "silhouettes of the crowd with raised hands, backlit by the stage", "color": "#1a1030" },
+    { "id": "neon-sign",    "bbox": [60, 70, 220, 200], "z": "mid",
+      "role": "pink neon sign on the side wall", "color": "#ec4899", "glow": true }
+  ]
+}

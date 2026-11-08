@@ -1,0 +1,8 @@
+{
+  "layout": "layouts/karaoke-stage.json",
+  "backend": "zai",
+  "skeleton": "demo/karaoke-stage/karaoke-stage__skeleton.png",
+  "render": "demo/karaoke-stage/karaoke-stage__render_zai.png",
+  "pipeline": "demo/karaoke-stage/karaoke-stage__pipeline_zai.png",
+  "prompt_chars": 900
+}

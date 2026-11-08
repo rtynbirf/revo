@@ -1,0 +1,25 @@
+{
+  "canvas": { "w": 1280, "h": 720 },
+  "style": {
+    "mood": "photorealistic cinematic wide shot of a 10000-GPU datacenter hall at night",
+    "palette": { "base": "#0b0f1a", "primary": "#2f6fed", "accent": "#14b8a6", "warm": "#f59e0b" },
+    "light": "cold electric-blue LED glow from server rows, teal light wall in the deep background, single warm key light on the human figure, polished floor reflections",
+    "perspective": [0.5, 0.47]
+  },
+  "elements": [
+    { "id": "led-wall",     "bbox": [430, 180, 850, 430], "z": "far",
+      "role": "teal LED status wall glowing in the deep background", "color": "#14b8a6", "glow": true },
+    { "id": "racks-left",   "bbox": [30, 150, 420, 650], "z": "mid",
+      "role": "long rows of dark server racks with rows of tiny blue LEDs, receding", "color": "#2f6fed", "glow": true },
+    { "id": "racks-right",  "bbox": [860, 150, 1250, 650], "z": "mid",
+      "role": "long rows of dark server racks with rows of tiny blue LEDs, receding, mirrored", "color": "#2f6fed", "glow": true },
+    { "id": "ceiling",      "bbox": [60, 40, 1220, 130], "z": "far",
+      "role": "dark industrial ceiling with long thin light strips", "color": "#22304f" },
+    { "id": "floor",        "bbox": [0, 560, 1280, 720], "z": "near",
+      "role": "polished dark reflective floor mirroring the LED rows", "color": "#101726" },
+    { "id": "aisle",        "bbox": [430, 430, 850, 700], "z": "near",
+      "role": "empty central aisle between the rack rows", "color": "#0e1424" },
+    { "id": "human",        "bbox": [590, 400, 700, 610], "z": "near",
+      "role": "lone engineer in an orange safety vest seen from behind, holding a tablet", "color": "#f59e0b", "glow": true }
+  ]
+}
