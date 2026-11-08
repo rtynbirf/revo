@@ -1,0 +1,99 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic cinematic shot of an underground karaoke stage — task: караоке клуб, магента-неон и толпа",
+    "palette": {
+      "base": "#120b1c",
+      "primary": "#a855f7",
+      "accent": "#ec4899",
+      "warm": "#fbbf24"
+    },
+    "light": "violet and magenta neon wash, warm spotlight cone through haze, lyric glow reflecting on the floor",
+    "perspective": [
+      0.5,
+      0.55
+    ]
+  },
+  "elements": [
+    {
+      "id": "lyric-screen",
+      "bbox": [
+        239,
+        60,
+        1039,
+        330
+      ],
+      "z": "far",
+      "color": "#a855f7",
+      "glow": true,
+      "role": "huge glowing karaoke lyric screen with large luminous words"
+    },
+    {
+      "id": "stage",
+      "bbox": [
+        79,
+        330,
+        1199,
+        559
+      ],
+      "z": "mid",
+      "color": "#ec4899",
+      "role": "wide dark stage platform with edge neon strip"
+    },
+    {
+      "id": "spotlight",
+      "bbox": [
+        520,
+        40,
+        759,
+        379
+      ],
+      "z": "mid",
+      "color": "#fbbf24",
+      "glow": true,
+      "role": "warm spotlight cone cutting through the haze onto the singer spot"
+    },
+    {
+      "id": "microphone",
+      "bbox": [
+        599,
+        350,
+        680,
+        518
+      ],
+      "z": "near",
+      "color": "#de9a6e",
+      "role": "vintage microphone on a stand at the center of the stage",
+      "glow": true
+    },
+    {
+      "id": "crowd",
+      "bbox": [
+        0,
+        559,
+        1280,
+        720
+      ],
+      "z": "near",
+      "color": "#4c2876",
+      "role": "silhouettes of the crowd with raised hands, backlit by the stage",
+      "glow": true
+    },
+    {
+      "id": "neon-sign",
+      "bbox": [
+        60,
+        70,
+        220,
+        199
+      ],
+      "z": "mid",
+      "color": "#ec4899",
+      "glow": true,
+      "role": "pink neon sign on the side wall"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-08T18:47:54+00:00",
+  "task": "ночной дата-центр на 10000 GPU, инженер в оранжевом жилете",
+  "brain": "datacenter",
+  "backend": "offline",
+  "attempts": 1,
+  "best_attempt": 1,
+  "score": 8.04,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-09-datacenter/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-09-datacenter/skeleton.png",
+  "layout_elements": 6
+}

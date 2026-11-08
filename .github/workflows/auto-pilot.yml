@@ -1,0 +1,47 @@
+name: AUTO-PILOT
+# Клетка автономии: каждый день REVO сам берёт задание из очереди, сам строит лейаут,
+# сам рендерит, сам себя критикует, сам чинит слабые зоны и сам коммитит результат.
+# Полностью offline (ЯРУС 0): не нужны ни ключи, ни z-ai — только Python + Pillow.
+on:
+  schedule:
+    - cron: "21 4 * * *" # ежедневно 04:21 UTC — в стороне от пика
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-pilot
+  cancel-in-progress: false
+
+jobs:
+  autonomous-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Deps
+        run: pip install -r requirements.txt
+      - name: Самодиагностика перед вылетом
+        run: python3 revo.py selftest
+      - name: Автономный прогон (мозг → рендер → критик → рефайн)
+        run: |
+          python3 revo.py auto \
+            --queue tasks/queue.txt \
+            --outdir "demo/auto/$(date -u +%F)" \
+            --backend offline --attempts 3
+      - name: Журнал полётов (числа из run.json, не руками)
+        run: python3 revo.py autolog "demo/auto"
+      - name: Самосообщение результата
+        run: |
+          git config user.name "revo[bot]"
+          git config user.email "revo[bot]@users.noreply.github.com"
+          git add demo/auto AUTO-LOG.md
+          if git diff --cached --quiet; then
+            echo "Новых кадров нет — пустых коммитов не будет (анти-шум)."
+          else
+            git commit -m "AUTO-PILOT: автономный прогон $(date -u +%F) [skip ci]"
+            git push
+          fi

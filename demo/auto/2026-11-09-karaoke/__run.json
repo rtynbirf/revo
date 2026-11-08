@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-08T18:48:04+00:00",
+  "task": "караоке клуб, магента-неон и толпа",
+  "brain": "karaoke",
+  "backend": "offline",
+  "attempts": 2,
+  "best_attempt": 2,
+  "score": 7.5,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-09-karaoke/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-09-karaoke/skeleton.png",
+  "layout_elements": 6
+}

@@ -1,0 +1,98 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic cinematic wide shot of a huge datacenter hall at night — task: ночной дата-центр на 10000 GPU, инженер в оранжевом жилете",
+    "palette": {
+      "base": "#0b0f1a",
+      "primary": "#2f6fed",
+      "accent": "#14b8a6",
+      "warm": "#f59e0b"
+    },
+    "light": "cold electric-blue LED glow from server rows, teal wall in the deep background, single warm key light on the human figure, polished floor reflections",
+    "perspective": [
+      0.5,
+      0.47
+    ]
+  },
+  "elements": [
+    {
+      "id": "led-wall",
+      "bbox": [
+        430,
+        180,
+        850,
+        432
+      ],
+      "z": "far",
+      "color": "#14b8a6",
+      "glow": true,
+      "role": "teal LED status wall glowing in the deep background"
+    },
+    {
+      "id": "racks-left",
+      "bbox": [
+        29,
+        150,
+        420,
+        648
+      ],
+      "z": "mid",
+      "color": "#2f6fed",
+      "glow": true,
+      "role": "long rows of dark server racks with rows of tiny blue LEDs, receding"
+    },
+    {
+      "id": "racks-right",
+      "bbox": [
+        860,
+        150,
+        1251,
+        648
+      ],
+      "z": "mid",
+      "color": "#2f6fed",
+      "glow": true,
+      "role": "long rows of dark server racks with rows of tiny blue LEDs, receding, mirrored"
+    },
+    {
+      "id": "ceiling",
+      "bbox": [
+        60,
+        40,
+        1220,
+        130
+      ],
+      "z": "far",
+      "color": "#22304f",
+      "role": "dark industrial ceiling with long thin light strips"
+    },
+    {
+      "id": "floor",
+      "bbox": [
+        0,
+        562,
+        1280,
+        720
+      ],
+      "z": "near",
+      "color": "#101726",
+      "role": "polished dark reflective floor mirroring the LED rows"
+    },
+    {
+      "id": "human",
+      "bbox": [
+        589,
+        400,
+        700,
+        612
+      ],
+      "z": "near",
+      "color": "#f59e0b",
+      "glow": true,
+      "role": "lone engineer in an orange safety vest seen from behind, holding a tablet"
+    }
+  ]
+}

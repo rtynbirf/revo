@@ -1,0 +1,12 @@
+# Очередь заданий AUTO-PILOT: клетка берёт строку по дню года (rotate), никогда не застревает.
+# Если файл пуст/отсутствует — задание изобретается из паттерн-библиотеки (revo.py next_task).
+ночной дата-центр на 10000 GPU, инженер в оранжевом жилете
+underground karaoke club, magenta neon, crowd silhouettes
+неоновый мегаполис после дождя, отражения в асфальте
+cozy reading room at dawn, warm lamp light
+рассвет в горах, туман в долине
+product studio shot of a vintage microphone
+космическая станция над кольцом астероидов
+forest cabin in morning fog, warm window light
+станция метро будущего, бирюзовая подсветка
+rooftop garden at sunset over the city
