@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-09T12:57:54+00:00",
+  "task": "cozy reading room at dawn, warm lamp light",
+  "brain": "cozy-room",
+  "backend": "offline",
+  "attempts": 2,
+  "best_attempt": 2,
+  "score": 7.68,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-09/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-09/skeleton.png",
+  "layout_elements": 5
+}

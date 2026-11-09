@@ -1,0 +1,86 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic cozy interior scene, soft cinematic warmth — task: cozy reading room at dawn, warm lamp light",
+    "palette": {
+      "base": "#1a1410",
+      "primary": "#d97706",
+      "accent": "#84cc16",
+      "warm": "#fcd34d"
+    },
+    "light": "warm lamp pools of light, soft shadows, dust motes in the air, gentle window glow",
+    "perspective": [
+      0.5,
+      0.52
+    ]
+  },
+  "elements": [
+    {
+      "id": "window",
+      "bbox": [
+        832,
+        86,
+        1178,
+        396
+      ],
+      "z": "far",
+      "color": "#fcd34d",
+      "glow": true,
+      "role": "tall window with dawn light and sheer curtains"
+    },
+    {
+      "id": "bookshelf",
+      "bbox": [
+        38,
+        108,
+        448,
+        518
+      ],
+      "z": "mid",
+      "color": "#9d5a0e",
+      "role": "tall wooden bookshelf packed with books",
+      "glow": true
+    },
+    {
+      "id": "armchair",
+      "bbox": [
+        486,
+        324,
+        794,
+        576
+      ],
+      "z": "near",
+      "color": "#c16008",
+      "role": "worn leather armchair with a knitted blanket",
+      "glow": true
+    },
+    {
+      "id": "lamp",
+      "bbox": [
+        794,
+        252,
+        922,
+        540
+      ],
+      "z": "near",
+      "color": "#fcd34d",
+      "glow": true,
+      "role": "warm floor lamp with fabric shade"
+    },
+    {
+      "id": "rug",
+      "bbox": [
+        320,
+        562,
+        1024,
+        706
+      ],
+      "z": "near",
+      "color": "#57534e",
+      "role": "soft round rug on wooden floor"
+    }
+  ]
+}
