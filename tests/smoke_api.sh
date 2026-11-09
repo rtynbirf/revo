@@ -134,6 +134,24 @@ code="$(post /api/render "$TMP/render_req.json" "$TMP/render.png")"
   && ok "POST /api/render (backend=offline) → 200 image/png" \
   || bad "POST /api/render" "code=$code png=$(is_png "$TMP/render.png" 2>/dev/null && echo yes || echo no)"
 
+# 6b. F-25 (M5): render плагином реестра (poster) → 200 PNG без правки ядра
+printf '{"layout": ' >"$TMP/render_poster_req.json"
+cat "$DC" >>"$TMP/render_poster_req.json"
+printf ', "backend": "poster"}' >>"$TMP/render_poster_req.json"
+code="$(post /api/render "$TMP/render_poster_req.json" "$TMP/render_poster.png")"
+[ "$code" = "200" ] && is_png "$TMP/render_poster.png" \
+  && ok "F-25: POST /api/render (backend=poster, плагин реестра) → 200 image/png" \
+  || bad "F-25: render плагином" "code=$code"
+
+# 6c. F-25 (M5): чужое имя бэкенда → 400 bad_backend (реестр честный)
+printf '{"layout": ' >"$TMP/render_bad_req.json"
+cat "$DC" >>"$TMP/render_bad_req.json"
+printf ', "backend": "net-takogo-bekenda"}' >>"$TMP/render_bad_req.json"
+code="$(post /api/render "$TMP/render_bad_req.json" "$TMP/render_bad.json")"
+[ "$code" = "400" ] && [ "$(json_get "$TMP/render_bad.json" error)" = "bad_backend" ] \
+  && ok "F-25: POST /api/render чужим бэкендом → 400 bad_backend (список реестра в detail)" \
+  || bad "F-25: чужой бэкенд" "code=$code body=$(cat "$TMP/render_bad.json" 2>/dev/null)"
+
 # 7. pipeline offline → отчёт §3.2 + файлы в tmp
 code="$(post /api/pipeline "$TMP/pipeline_req.json" "$TMP/pipeline.json")"
 pl_render="$(json_get "$TMP/pipeline.json" render)"

@@ -28,6 +28,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import backend_registry  # F-25 (M5): реестр рендер-бэкендов — новые бэкенды без правки ядра
+
 try:
     from PIL import Image, ImageDraw, ImageFilter, ImageFont
 except ImportError:  # pragma: no cover
@@ -578,7 +580,11 @@ def merge(a_path: str, b_path: str, out: str,
 
 def run_pipeline(lay_path: str, outdir: str, backend: str | None = None,
                  size: str = "1344x768") -> dict:
-    """v1-режим одним вызовом: layout → skeleton + prompt + render + merge + отчёт."""
+    """v1-режим одним вызовом: layout → skeleton + prompt + render + merge + отчёт.
+
+    F-25 (M5): бэкенд берётся из реестра (backend_registry) — любой плагин
+    из backends/ работает без правок ядра; имя честно печатается в __run.json.
+    """
     lay = load_layout(lay_path)
     od = Path(outdir)
     od.mkdir(parents=True, exist_ok=True)
@@ -587,10 +593,7 @@ def run_pipeline(lay_path: str, outdir: str, backend: str | None = None,
     pr = compile_prompt(lay)
     (od / f"{stem}__prompt.txt").write_text(pr, encoding="utf-8")
     be = backend or detect_backend()
-    if be == "zai":
-        rp = render_zai(lay, str(od / f"{stem}__render_zai.png"), size, pr)
-    else:
-        rp = render_offline(lay, str(od / f"{stem}__render_offline.png"))
+    rp = backend_registry.render(be, lay, pr, size, str(od / f"{stem}__render_{be}.png"))
     mg = merge(sk, rp, str(od / f"{stem}__pipeline_{be}.png"))
     rep = {
         "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
@@ -607,6 +610,123 @@ def run_pipeline(lay_path: str, outdir: str, backend: str | None = None,
 
 def detect_backend() -> str:
     return "zai" if shutil.which("z-ai") else "offline"
+
+
+# ================================================================ F-26 (M5) ==
+
+_HUE_NAMES = (("red", 0), ("yellow", 60), ("green", 120), ("cyan", 180),
+              ("blue", 240), ("magenta", 300))
+_POS_NAMES = (("upper left", 0, 0), ("upper right", 0, 1), ("lower left", 1, 0),
+              ("lower right", 1, 1))
+
+
+def _hue_name(r: int, g: int, b: int) -> str:
+    """Детерминированное английское имя оттенка (идёт в роль зоны → промпт)."""
+    mx, mn = max(r, g, b), min(r, g, b)
+    if mx < 48:
+        return "near-black"
+    if mn > 207:
+        return "pale"
+    if mx - mn < 24:
+        return "dark gray" if mx < 128 else "light gray"
+    h = (lambda c, d: 0 if c == r else 60 if c == g else 120)(mx, mx - mn)
+    if mx == r:
+        h = (60 * ((g - b) / (mx - mn))) % 360
+    elif mx == g:
+        h = 60 * ((b - r) / (mx - mn)) + 120
+    else:
+        h = 60 * ((r - g) / (mx - mn)) + 240
+    near = min(_HUE_NAMES, key=lambda hn: min(abs(h - hn[1]), 360 - abs(h - hn[1])))
+    return f"{near[0]}{' dark' if mx < 110 else ''}"
+
+
+def _pos_name(cx: float, cy: float) -> str:
+    """Позиция зоны на полотне словами (детерминированно, для роли)."""
+    top = cy < 0.5
+    left = cx < 0.5
+    if 0.35 <= cx <= 0.65:
+        return "upper center" if top else "lower center"
+    if 0.35 <= cy <= 0.65:
+        return "center left" if left else "center right"
+    return f"{'upper' if top else 'lower'} {'left' if left else 'right'}"
+
+
+def image2layout(img_path: str, zones: int = 12) -> dict:
+    """F-26 (M5): реконструкция image → layout.
+
+    Сеточная сегментация + доминантные цвета → прямоугольные зоны с z по
+    вертикали (верх — far, низ — near). Число зон (гранулярность квантования)
+    настраивается 5..50 (честный клэмп, F-26). Только Pillow (N-03),
+    детерминированно (N-02): одинаковая картинка → одинаковый layout.
+    Роли — детерминированные английские строки (идут в промпт как есть,
+    docs/FORMAT.md). Приёмка: результат проходит validate() и даёт скелет.
+    """
+    zones = max(5, min(50, int(zones)))
+    im = Image.open(img_path).convert("RGB")
+    w0, h0 = im.size
+    scale = min(1.0, 4096 / max(w0, h0), 1.0)
+    w, h = max(64, int(w0 * scale)), max(64, int(h0 * scale))
+    if (w, h) != (w0, h0):
+        im = im.resize((w, h))
+    cols = max(4, min(28, w // 56))
+    cell = w / cols
+    rows = max(3, int(round(h / cell)))
+    small = im.resize((cols, rows), Image.BOX)
+    q = small.quantize(colors=zones, method=Image.MEDIANCUT).convert("RGB")
+    cells = [q.getpixel((cx, cy)) for cy in range(rows) for cx in range(cols)]
+    # жадное слияние одинаковых ячеек в прямоугольники (occupancy-сетка)
+    used = [False] * (rows * cols)
+    rects = []
+    for cy in range(rows):
+        for cx in range(cols):
+            idx = cy * cols + cx
+            if used[idx]:
+                continue
+            col = cells[idx]
+            x1 = cx
+            while x1 + 1 < cols and not used[cy * cols + x1 + 1] and cells[cy * cols + x1 + 1] == col:
+                x1 += 1
+            y1 = cy
+            while y1 + 1 < rows and all(
+                    not used[(y1 + 1) * cols + x] and cells[(y1 + 1) * cols + x] == col
+                    for x in range(cx, x1 + 1)):
+                y1 += 1
+            for yy in range(cy, y1 + 1):
+                for xx in range(cx, x1 + 1):
+                    used[yy * cols + xx] = True
+            rects.append((cx, cy, x1, y1, col))
+    # мелкие осколки (< 1% площади) склеиваем в соседей по цвету — честный минимум зон
+    big = [r for r in rects if (r[2] - r[0] + 1) * (r[3] - r[1] + 1) >= max(1, int(0.01 * cols * rows))]
+    big.sort(key=lambda r: (r[1], r[0]))
+    avg = tuple(sum(c[i] for c in cells) // len(cells) for i in range(3))
+    sat = max(cells, key=lambda c: max(c) - min(c))
+    accent = "#{:02x}{:02x}{:02x}".format(*sat)
+    els = []
+    for i, (cx0, cy0, cx1, cy1, col) in enumerate(big, 1):
+        x0 = max(0, min(w - 1, int(cx0 * cell)))
+        y0 = max(0, min(h - 1, int(cy0 * cell)))
+        x1p = max(x0 + 1, min(w, int((cx1 + 1) * cell)))
+        y1p = max(y0 + 1, min(h, int((cy1 + 1) * cell)))
+        zc = (cx0 + cx1 + 1) / 2 / cols
+        zcy = (cy0 + cy1 + 1) / 2 / rows
+        z = "far" if zcy < 0.34 else ("near" if zcy >= 0.67 else "mid")
+        els.append({
+            "id": f"z{i:02d}",
+            "bbox": [x0, y0, x1p, y1p],
+            "z": z,
+            "role": f"{_hue_name(*col)} block in the {_pos_name(zc, zcy)}",
+            "color": "#{:02x}{:02x}{:02x}".format(*col),
+        })
+    lay = {
+        "canvas": {"w": w, "h": h},
+        "style": {"palette": {"base": "#{:02x}{:02x}{:02x}".format(*avg), "accent": accent}},
+        "elements": els,
+    }
+    errs = validate(lay)
+    if errs:  # честный красный: реконструкция не должна молча выдавать мусор
+        sys.exit("REVO: image2layout выдал невалидный layout (баг алгоритма):\n  - "
+                 + "\n  - ".join(errs))
+    return lay
 
 
 def next_task(queue: str | None, invent: bool = True) -> str:
@@ -637,13 +757,14 @@ def run_auto(task: str, outdir: str, backend: str | None = None,
     history, best = [], None
     prompt = base_prompt
     for i in range(1, attempts + 1):
+        rp = str(od / f"render_a{i}.png")
         if backend == "zai":
-            rp = str(od / f"render_a{i}.png")
             render_zai(lay, rp, size, prompt)
             Image.open(rp).convert("RGB").resize((lay["canvas"]["w"], lay["canvas"]["h"])).save(rp, optimize=True)
         else:
             lay = refine_layout(lay, history[-1]["critic"]) if history else lay
-            rp = render_offline(lay, str(od / f"render_a{i}.png"))
+            # F-25: offline и любой плагин реестра — через единую дверь реестра
+            backend_registry.render(backend, lay, prompt, size, rp)
         crit = analyze_zones(rp, lay)
         (od / f"critic_a{i}.json").write_text(json.dumps(crit, ensure_ascii=False, indent=2), encoding="utf-8")
         history.append({"attempt": i, "render": rp, "critic": crit})
@@ -693,7 +814,7 @@ def autolog(outdir: str, outfile: str = "AUTO-LOG.md") -> str:
 def selftest() -> int:
     import tempfile
     ok = 0
-    total = 14  # 10 ядра (M0/M1) + 2 сервера M2 (N-02, F-14) + диф зон (M4) + цикл проектов M4
+    total = 21  # 10 ядра (M0/M1) + 2 сервера M2 (N-02, F-14) + диф зон (M4) + цикл проектов M4 + 7 M5 (F-25/F-26)
     tmp = tempfile.mkdtemp(prefix="revo-selftest-")
     good = {"canvas": {"w": 640, "h": 360},
             "style": {"palette": {"base": "#0b0f1a", "accent": "#14b8a6"}},
@@ -881,6 +1002,130 @@ def selftest() -> int:
           f"14 M4: проект→версия+диф→экспорт ZIP→импорт→1:1 (SHA256 layout){' — ' + note14 if note14 else ''}")
     ok += ok14
 
+    # 15. F-25 (M5): реестр бэкендов видит встроенные и плагин-пример живьём
+    names15 = [c["name"] for c in backend_registry.list_backends()]
+    ok15 = {"offline", "zai", "poster"} <= set(names15) and backend_registry.known("poster")
+    print(("PASS" if ok15 else "FAIL"),
+          f"15 F-25 реестр бэкендов: offline+zai+плагин poster живьём ({', '.join(names15)})")
+    ok += ok15
+
+    # 16. F-25 (M5): рендер плагином без правки ядра + детерминизм (N-02)
+    ok16, note16 = False, ""
+    try:
+        dc16 = json.loads((Path(__file__).resolve().parent / "layouts" / "datacenter.json")
+                          .read_text(encoding="utf-8"))
+        pa = backend_registry.render("poster", dc16, "night datacenter hum",
+                                     "640x360", f"{tmp}/post_a.png")
+        pb = backend_registry.render("poster", dc16, "night datacenter hum",
+                                     "640x360", f"{tmp}/post_b.png")
+        ok16 = (Path(pa).exists() and hashlib.sha256(Path(pa).read_bytes()).hexdigest()
+                == hashlib.sha256(Path(pb).read_bytes()).hexdigest())
+    except Exception as e:
+        note16 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok16 else "FAIL"),
+          f"16 F-25 плагин poster рендерит и детерминирован (SHA256 двух рендеров){' — ' + note16 if note16 else ''}")
+    ok += ok16
+
+    # 17. F-25 (M5): неизвестный бэкенд — честный отказ (не тихий offline)
+    ok17 = False
+    try:
+        backend_registry.get_backend("net-sushchestvuet")
+    except SystemExit as e:
+        ok17 = "не в реестре" in str(e)
+    print(("PASS" if ok17 else "FAIL"), "17 F-25 неизвестный бэкенд → честный ФАКТ-отказ")
+    ok += ok17
+
+    # 18. F-25 (M5): pipeline с плагином (имя бэкенда в __run.json честное)
+    ok18, note18 = False, ""
+    try:
+        rep18 = run_pipeline(str(glp), f"{tmp}/pipe-poster", "poster")
+        ok18 = (Path(rep18["render"]).exists() and rep18["backend"] == "poster"
+                and "poster" in Path(rep18["pipeline"]).name)
+    except Exception as e:
+        note18 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok18 else "FAIL"),
+          f"18 F-25 pipeline с плагином poster → render/pipeline файлы с именем бэкенда{' — ' + note18 if note18 else ''}")
+    ok += ok18
+
+    # 19. F-26 (M5): image2layout — синтетическая сцена → валидный layout + скелет
+    ok19, note19 = False, ""
+    try:
+        syn = Image.new("RGB", (640, 360), (24, 32, 56))
+        dsyn = ImageDraw.Draw(syn)
+        dsyn.rectangle([0, 0, 640, 120], fill=(120, 160, 210))   # «небо»
+        dsyn.rectangle([60, 140, 260, 340], fill=(30, 120, 90))  # «лес» слева
+        dsyn.rectangle([380, 180, 620, 340], fill=(210, 150, 60))  # «песок» справа
+        syn_path = f"{tmp}/syn_scene.png"
+        syn.save(syn_path)
+        lay19 = image2layout(syn_path, zones=8)
+        sk19 = draw_skeleton(lay19, f"{tmp}/syn_skeleton.png")
+        ok19 = (not validate(lay19) and 3 <= len(lay19["elements"]) <= 50
+                and Path(sk19).exists()
+                and any(e["z"] == "far" for e in lay19["elements"])
+                and any(e["z"] == "near" for e in lay19["elements"]))
+    except Exception as e:
+        note19 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok19 else "FAIL"),
+          f"19 F-26 image2layout: валидный layout, z-глубина, скелет рождается{' — ' + note19 if note19 else ''}")
+    ok += ok19
+
+    # 20. F-26 (M5): детерминизм реконструкции — одинаковая картинка → одинаковый layout
+    ok20, note20 = False, ""
+    try:
+        la = image2layout(syn_path, zones=8)
+        lb = image2layout(syn_path, zones=8)
+        ok20 = (json.dumps(la, sort_keys=True) == json.dumps(lb, sort_keys=True))
+    except Exception as e:
+        note20 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok20 else "FAIL"),
+          f"20 F-26 детерминизм image2layout (два прохода 1:1){' — ' + note20 if note20 else ''}")
+    ok += ok20
+
+    # 21. F-25 (M5): сервер /api/render с плагином → 200 PNG; чужое имя → 400
+    ok21, note21 = False, ""
+    import socket
+    import time
+    import urllib.error
+    import urllib.request
+    srv21 = Path(__file__).resolve().parent / "revo_server.py"
+    proc21 = None
+    try:
+        s21 = socket.socket()
+        s21.bind(("127.0.0.1", 0))
+        port21 = s21.getsockname()[1]
+        s21.close()
+        proc21 = subprocess.Popen(
+            [sys.executable, str(srv21), "--port", str(port21)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        base21 = f"http://127.0.0.1:{port21}"
+        for _ in range(50):
+            try:
+                if urllib.request.urlopen(f"{base21}/health", timeout=1).status == 200:
+                    break
+            except Exception:
+                time.sleep(0.1)
+        body21 = json.dumps({"layout": good, "backend": "poster"}).encode()
+        r21 = urllib.request.urlopen(urllib.request.Request(
+            f"{base21}/api/render", data=body21, headers={"Content-Type": "application/json"}), timeout=10)
+        png21 = r21.read()
+        body_bad = json.dumps({"layout": good, "backend": "net-sushchestvuet"}).encode()
+        try:
+            urllib.request.urlopen(urllib.request.Request(
+                f"{base21}/api/render", data=body_bad,
+                headers={"Content-Type": "application/json"}), timeout=10)
+            ok21 = False
+        except urllib.error.HTTPError as e21:
+            ok21 = (r21.status == 200 and png21[:8] == b"\x89PNG\r\n\x1a\n"
+                    and e21.code == 400 and b"bad_backend" in e21.read())
+    except Exception as e:
+        note21 = f"{type(e).__name__}: {e}"
+    finally:
+        if proc21 is not None:
+            proc21.kill()
+    print(("PASS" if ok21 else "FAIL"),
+          f"21 F-25 сервер: /api/render плагином → 200 PNG; чужое имя → 400 bad_backend{' — ' + note21 if note21 else ''}")
+    ok += ok21
+
     print(f"--- selftest {ok}/{total}")
     return 0 if ok == total else 1
 
@@ -897,10 +1142,11 @@ def main(argv=None):
     p = sub.add_parser("compose"); p.add_argument("task"); p.add_argument("-o", "--out", required=True)
     p.add_argument("--size", default="1280x720")
     p = sub.add_parser("render"); p.add_argument("layout"); p.add_argument("-o", "--out", required=True)
-    p.add_argument("-b", "--backend", choices=["offline", "zai"], default=None)
+    p.add_argument("-b", "--backend", default=None,
+                   help="имя из реестра (revo.py backends): offline, zai или плагин")
     p.add_argument("-s", "--size", default="1344x768")
     p = sub.add_parser("pipeline"); p.add_argument("layout"); p.add_argument("--outdir", required=True)
-    p.add_argument("-b", "--backend", choices=["offline", "zai"], default=None)
+    p.add_argument("-b", "--backend", default=None)
     p.add_argument("-s", "--size", default="1344x768")
     p = sub.add_parser("merge"); p.add_argument("a"); p.add_argument("b"); p.add_argument("-o", "--out", required=True)
     p = sub.add_parser("critic"); p.add_argument("render"); p.add_argument("layout")
@@ -908,10 +1154,14 @@ def main(argv=None):
     p = sub.add_parser("auto"); p.add_argument("task", nargs="?")
     p.add_argument("--queue", default=None)
     p.add_argument("--outdir", default=None)
-    p.add_argument("-b", "--backend", choices=["offline", "zai"], default=None)
+    p.add_argument("-b", "--backend", default=None)
     p.add_argument("--attempts", type=int, default=3)
     p.add_argument("-s", "--size", default="1344x768")
     p = sub.add_parser("autolog"); p.add_argument("outdir", nargs="?", default="demo/auto")
+    sub.add_parser("backends")  # F-25: живой срез реестра бэкендов
+    p = sub.add_parser("image2layout")  # F-26: реконструкция image → layout
+    p.add_argument("image"); p.add_argument("-o", "--out", required=True)
+    p.add_argument("--zones", type=int, default=12, help="гранулярность 5..50")
     sub.add_parser("selftest")
     args = ap.parse_args(argv)
 
@@ -937,10 +1187,18 @@ def main(argv=None):
         sys.exit(0 if not errs else 2)
     elif args.cmd == "render":
         lay_r = load_layout(args.layout)
-        if (args.backend or detect_backend()) == "zai":
-            print("saved:", render_zai(lay_r, args.out, args.size))
-        else:
-            print("saved:", render_offline(lay_r, args.out))
+        be = args.backend or detect_backend()
+        print("saved:", backend_registry.render(be, lay_r, None, args.size, args.out))
+    elif args.cmd == "backends":
+        cards = backend_registry.list_backends()
+        print(f"ФАКТ: реестр бэкендов REVO — {len(cards)} шт. (контракт F-25: новые бэкенды = файл в backends/ без правки ядра)")
+        for c in cards:
+            mark = "⛔" if c["kind"] == "broken" else ("NET" if c["kind"] == "network" else "OFF")
+            print(f"  {c['name']:12s} [{mark:3s}] {c['description']}  ({c['source']})")
+    elif args.cmd == "image2layout":
+        lay_i = image2layout(args.image, args.zones)
+        Path(args.out).write_text(json.dumps(lay_i, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"ФАКТ: image2layout: зон={len(lay_i['elements'])} канва={lay_i['canvas']['w']}x{lay_i['canvas']['h']} → {args.out} (VALID ✓)")
     elif args.cmd == "pipeline":
         print(json.dumps(run_pipeline(args.layout, args.outdir, args.backend, args.size),
                          ensure_ascii=False, indent=2))

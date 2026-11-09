@@ -94,7 +94,7 @@ layout.json ──► [1] СКЕЛЕТ      рамки зон, подписи, �
 - ✅ `docs/PARITY.md`: 12/12 вердиктов парити (**4 ✅ / 5 🔶 / 3 ⛔**);
 - ✅ AUTO-PILOT в CI: ежедневный прогон offline, самокоммит, анти-шум;
 - ✅ v1 ядро (skeleton/prompt/render/merge) не тронуто — обратная совместимость;
-- 🔶 честно не готово: реестр рендер-бэкендов и image2layout — M5 (F-25/F-26);
+- ✅ реестр рендер-бэкендов (F-25: `backend_registry.py` + плагин `poster`, новый бэкенд = файл в backends/ без правки ядра) и image2layout (F-26: `revo.py image2layout photo.jpg -o l.json --zones 5..50`) — M5 исполнено 2026-11-09 (selftest 21/21, смоук 36/0);
 - ⚙️ LLM-мозг (ЯРУС 1) и VLM-глаза — опциональные усиления; без них всё работает offline;
 - 🖐 social-preview в настройках репо — только руками в UI (GitHub API это запрещает).
 

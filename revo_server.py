@@ -394,8 +394,11 @@ class RevoHandler(BaseHTTPRequestHandler):
     @staticmethod
     def _backend(body: dict) -> str:
         be = body.get("backend", "offline")  # N-01: умолчание всегда offline
-        if be not in ("offline", "zai"):
-            raise ApiError(400, "bad_backend", ["'backend' ∈ {offline, zai}"])
+        # F-25 (M5): имена — из живого реестра (offline, zai, плагины backends/)
+        import backend_registry  # noqa: PLC0415 — лениво, сервер стартует без плагинов
+        if not backend_registry.known(be):
+            names = ", ".join(c["name"] for c in backend_registry.list_backends())
+            raise ApiError(400, "bad_backend", [f"'backend' не в реестре (доступны: {names})"])
         return be
 
     @staticmethod
@@ -559,11 +562,14 @@ class RevoHandler(BaseHTTPRequestHandler):
         out = str(self._req_dir() / f"render_{be}.png")
         if be == "zai":  # падение бэкенда → SystemExit → 502 в общем обработчике
             revo.render_zai(lay, out, f"{size[0]}x{size[1]}")
-        else:
+        elif be == "offline":
             revo.render_offline(lay, out)
             if (size[0], size[1]) != (lay["canvas"]["w"], lay["canvas"]["h"]):
                 img = Image.open(out).resize((size[0], size[1]))
                 img.save(out, optimize=True)
+        else:  # F-25: плагин реестра — единая дверь, размер — на договоре плагина
+            import backend_registry  # noqa: PLC0415
+            backend_registry.render(be, lay, None, f"{size[0]}x{size[1]}", out)
         self._send(200, Path(out).read_bytes(), "image/png")
 
     def _h_pipeline(self):
