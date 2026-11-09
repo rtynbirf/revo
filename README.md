@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="banner.png" alt="revo — Метод Reve: сначала LAYOUT — потом RENDER · Серия LABS №26" width="100%">
+</div>
+
 # REVO — автономный прототип метода Reve: layout → render
 
 ![social-preview](.github/social-preview.png)
