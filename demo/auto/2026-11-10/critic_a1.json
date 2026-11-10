@@ -1,0 +1,57 @@
+{
+  "overall": 7.69,
+  "zones": [
+    {
+      "id": "peaks-far",
+      "score": 0.753,
+      "mean_rgb": [
+        39,
+        45,
+        54
+      ],
+      "detail_std": 18.5
+    },
+    {
+      "id": "peaks-mid",
+      "score": 0.772,
+      "mean_rgb": [
+        61,
+        71,
+        86
+      ],
+      "detail_std": 43.0
+    },
+    {
+      "id": "mist",
+      "score": 0.862,
+      "mean_rgb": [
+        114,
+        127,
+        144
+      ],
+      "detail_std": 14.6
+    },
+    {
+      "id": "foreground-rock",
+      "score": 0.682,
+      "mean_rgb": [
+        20,
+        28,
+        46
+      ],
+      "detail_std": 13.1
+    },
+    {
+      "id": "sun",
+      "score": 0.793,
+      "mean_rgb": [
+        136,
+        87,
+        49
+      ],
+      "detail_std": 8.7
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}

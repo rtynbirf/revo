@@ -1,0 +1,84 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic epic mountain landscape at dawn, cinematic scale — task: рассвет в горах, туман в долине",
+    "palette": {
+      "base": "#101820",
+      "primary": "#38bdf8",
+      "accent": "#fb923c",
+      "warm": "#fde68a"
+    },
+    "light": "first sun rays kissing the peaks, cold blue valley mist, golden rim light",
+    "perspective": [
+      0.5,
+      0.42
+    ]
+  },
+  "elements": [
+    {
+      "id": "peaks-far",
+      "bbox": [
+        0,
+        72,
+        1280,
+        324
+      ],
+      "z": "far",
+      "color": "#334155",
+      "role": "distant snow-capped mountain range glowing with first light"
+    },
+    {
+      "id": "peaks-mid",
+      "bbox": [
+        0,
+        216,
+        1280,
+        432
+      ],
+      "z": "mid",
+      "color": "#1e293b",
+      "role": "closer dark rocky ridges"
+    },
+    {
+      "id": "mist",
+      "bbox": [
+        0,
+        360,
+        1280,
+        518
+      ],
+      "z": "mid",
+      "color": "#94a3b8",
+      "glow": true,
+      "role": "river of soft mist filling the valley"
+    },
+    {
+      "id": "foreground-rock",
+      "bbox": [
+        0,
+        504,
+        576,
+        720
+      ],
+      "z": "near",
+      "color": "#0f172a",
+      "role": "dark rocky slope with pine silhouettes"
+    },
+    {
+      "id": "sun",
+      "bbox": [
+        870,
+        115,
+        1050,
+        216
+      ],
+      "z": "far",
+      "color": "#fb923c",
+      "glow": true,
+      "role": "rising sun disc in golden haze"
+    }
+  ]
+}
