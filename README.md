@@ -2,6 +2,15 @@
   <img src="banner.png" alt="revo — Метод Reve: сначала LAYOUT — потом RENDER · Серия LABS №26" width="100%">
 </div>
 
+<!--ФОРЖ:МУЗА:НАЧАЛО-->
+<div align="center">
+  <img src="repo-muse.svg" width="100%" alt="Муза revo: картина кузни ПОЛИМАТ, раунд 8" />
+  <br/>
+  <img src="forge-divider.svg" width="62%" alt="разделитель кузни ПОЛИМАТ" />
+</div>
+<!--ФОРЖ:МУЗА:КОНЕЦ-->
+
+
 # REVO — автономный прототип метода Reve: layout → render
 
 ![social-preview](.github/social-preview.png)
@@ -130,3 +139,10 @@ layout.json ──► [1] СКЕЛЕТ      рамки зон, подписи, �
 
 ---
 *REVO · серия RTYNBIRF LABS №26 · MIT · v2 автономия + M2 сервер + M3 редактор, 2026-11-09. Сначала структура — потом картинка. Сам.*
+
+<!--ФОРЖ:ПОДВАЛ-->
+---
+
+<div align="center">
+  <sub>◆ картина и штандарт — ручная ковка <a href="https://github.com/rtynbirf">КУЗНИ ПОЛИМАТ</a> · ЧЕЛОВЕК=АККАУНТ=PID1 ◆</sub>
+</div>
