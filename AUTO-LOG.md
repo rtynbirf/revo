@@ -9,3 +9,4 @@
 | 2026-11-08T18:47 | ночной дата-центр на 10000 GPU, инженер в оранжевом жилете | datacenter | offline | 1 | **8.04** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-09-datacenter/pipeline_best.png) |
 | 2026-11-08T18:48 | караоке клуб, магента-неон и толпа | karaoke | offline | 2 | **7.5** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-09-karaoke/pipeline_best.png) |
 | 2026-11-10T12:43 | рассвет в горах, туман в долине | mountains | offline | 1 | **7.69** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-10/pipeline_best.png) |
+| 2026-11-11T11:55 | product studio shot of a vintage microphone | studio | offline | 2 | **7.76** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-11/pipeline_best.png) |

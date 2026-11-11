@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-11T11:55:18+00:00",
+  "task": "product studio shot of a vintage microphone",
+  "brain": "studio",
+  "backend": "offline",
+  "attempts": 2,
+  "best_attempt": 2,
+  "score": 7.76,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-11/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-11/skeleton.png",
+  "layout_elements": 4
+}

@@ -1,0 +1,47 @@
+{
+  "overall": 7.76,
+  "zones": [
+    {
+      "id": "backdrop",
+      "score": 0.748,
+      "mean_rgb": [
+        61,
+        62,
+        66
+      ],
+      "detail_std": 75.5
+    },
+    {
+      "id": "subject",
+      "score": 0.758,
+      "mean_rgb": [
+        223,
+        225,
+        229
+      ],
+      "detail_std": 8.1
+    },
+    {
+      "id": "pedestal",
+      "score": 0.795,
+      "mean_rgb": [
+        107,
+        110,
+        115
+      ],
+      "detail_std": 7.7
+    },
+    {
+      "id": "reflection",
+      "score": 0.792,
+      "mean_rgb": [
+        97,
+        98,
+        102
+      ],
+      "detail_std": 8.4
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}

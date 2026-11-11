@@ -1,0 +1,50 @@
+{
+  "overall": 7.28,
+  "zones": [
+    {
+      "id": "backdrop",
+      "score": 0.761,
+      "mean_rgb": [
+        59,
+        60,
+        64
+      ],
+      "detail_std": 75.8
+    },
+    {
+      "id": "subject",
+      "score": 0.745,
+      "mean_rgb": [
+        225,
+        227,
+        231
+      ],
+      "detail_std": 5.6
+    },
+    {
+      "id": "pedestal",
+      "score": 0.701,
+      "mean_rgb": [
+        48,
+        51,
+        57
+      ],
+      "detail_std": 15.2
+    },
+    {
+      "id": "reflection",
+      "score": 0.716,
+      "mean_rgb": [
+        28,
+        29,
+        33
+      ],
+      "detail_std": 15.8
+    }
+  ],
+  "verdicts": [
+    "ХВОСТ: 'pedestal' (score 0.701) — усилить контраст/насыщенность",
+    "ХВОСТ: 'reflection' (score 0.716) — усилить контраст/насыщенность"
+  ],
+  "pass": false
+}

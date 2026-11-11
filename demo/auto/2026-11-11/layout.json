@@ -1,0 +1,73 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "clean photorealistic studio product shot, commercial quality — task: product studio shot of a vintage microphone",
+    "palette": {
+      "base": "#111114",
+      "primary": "#e5e7eb",
+      "accent": "#3b82f6",
+      "warm": "#f59e0b"
+    },
+    "light": "large soft key from upper left, rim light separating subject, gradient backdrop, subtle floor reflection",
+    "perspective": [
+      0.5,
+      0.55
+    ]
+  },
+  "elements": [
+    {
+      "id": "backdrop",
+      "bbox": [
+        0,
+        0,
+        1280,
+        576
+      ],
+      "z": "far",
+      "color": "#1f2126",
+      "role": "seamless gradient studio backdrop"
+    },
+    {
+      "id": "subject",
+      "bbox": [
+        435,
+        216,
+        845,
+        518
+      ],
+      "z": "near",
+      "color": "#e5e7eb",
+      "glow": true,
+      "role": "hero product on a pedestal, perfectly centered"
+    },
+    {
+      "id": "pedestal",
+      "bbox": [
+        384,
+        518,
+        896,
+        634
+      ],
+      "z": "near",
+      "color": "#6b6e73",
+      "role": "matte cylinder pedestal",
+      "glow": true
+    },
+    {
+      "id": "reflection",
+      "bbox": [
+        384,
+        634,
+        896,
+        720
+      ],
+      "z": "near",
+      "color": "#5f6064",
+      "role": "subtle mirror reflection of the product",
+      "glow": true
+    }
+  ]
+}
