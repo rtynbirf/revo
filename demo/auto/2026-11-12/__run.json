@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-12T12:49:41+00:00",
+  "task": "космическая станция над кольцом астероидов",
+  "brain": "space",
+  "backend": "offline",
+  "attempts": 1,
+  "best_attempt": 1,
+  "score": 7.57,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-12/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-12/skeleton.png",
+  "layout_elements": 4
+}
