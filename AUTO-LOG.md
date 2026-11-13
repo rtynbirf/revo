@@ -11,3 +11,4 @@
 | 2026-11-10T12:43 | рассвет в горах, туман в долине | mountains | offline | 1 | **7.69** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-10/pipeline_best.png) |
 | 2026-11-11T11:55 | product studio shot of a vintage microphone | studio | offline | 2 | **7.76** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-11/pipeline_best.png) |
 | 2026-11-12T12:49 | космическая станция над кольцом астероидов | space | offline | 1 | **7.57** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-12/pipeline_best.png) |
+| 2026-11-13T12:18 | forest cabin in morning fog, warm window light | cabin | offline | 2 | **8.16** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-13/pipeline_best.png) |

@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-13T12:18:27+00:00",
+  "task": "forest cabin in morning fog, warm window light",
+  "brain": "cabin",
+  "backend": "offline",
+  "attempts": 2,
+  "best_attempt": 2,
+  "score": 8.16,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-13/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-13/skeleton.png",
+  "layout_elements": 5
+}
