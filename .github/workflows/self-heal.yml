@@ -30,6 +30,8 @@ on:
       - "Dependabot Updates"
       - "Dependency Graph"
       - "Scorecard analysis"
+      - "РЕВО ОБХОД"
+      - "Workflow security lint (zizmor)"
     types: [completed]
 permissions:
   actions: write
