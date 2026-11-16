@@ -1,0 +1,67 @@
+{
+  "overall": 8.04,
+  "zones": [
+    {
+      "id": "led-wall",
+      "score": 0.869,
+      "mean_rgb": [
+        28,
+        105,
+        98
+      ],
+      "detail_std": 17.7
+    },
+    {
+      "id": "racks-left",
+      "score": 0.859,
+      "mean_rgb": [
+        37,
+        81,
+        169
+      ],
+      "detail_std": 18.6
+    },
+    {
+      "id": "racks-right",
+      "score": 0.859,
+      "mean_rgb": [
+        37,
+        81,
+        169
+      ],
+      "detail_std": 18.6
+    },
+    {
+      "id": "ceiling",
+      "score": 0.729,
+      "mean_rgb": [
+        24,
+        33,
+        51
+      ],
+      "detail_std": 15.2
+    },
+    {
+      "id": "floor",
+      "score": 0.784,
+      "mean_rgb": [
+        27,
+        35,
+        52
+      ],
+      "detail_std": 25.4
+    },
+    {
+      "id": "human",
+      "score": 0.739,
+      "mean_rgb": [
+        239,
+        157,
+        14
+      ],
+      "detail_std": 5.3
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}

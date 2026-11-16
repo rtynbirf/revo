@@ -14,3 +14,4 @@
 | 2026-11-13T12:18 | forest cabin in morning fog, warm window light | cabin | offline | 2 | **8.16** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-13/pipeline_best.png) |
 | 2026-11-14T11:33 | станция метро будущего, бирюзовая подсветка | space | offline | 1 | **7.57** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-14/pipeline_best.png) |
 | 2026-11-15T11:59 | rooftop garden at sunset over the city | cyber-city | offline | 1 | **7.98** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-15/pipeline_best.png) |
+| 2026-11-16T12:50 | ночной дата-центр на 10000 GPU, инженер в оранжевом жилете | datacenter | offline | 1 | **8.04** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-16/pipeline_best.png) |
