@@ -72,10 +72,12 @@ cron 04:21 UTC → selftest → задание из tasks/queue.txt (rotate по
 ```bash
 pip install -r requirements.txt     # = pillow
 
-python3 revo.py selftest                       # 14 проверок ядра, сервера и проектов
+python3 revo.py selftest                       # 24 проверки: ядро+сервер+проекты+M5+M6
 python3 revo.py auto "караоке клуб, неон"      # полный автономный цикл
 python3 revo.py patterns                       # библиотека архетипов
 python3 revo.py compose "ночной город" -o l.json   # только мозг → layout.json
+python3 revo.py compose "ночной город" -o l.json --zones 14  # F-27: >8 зон (5..64, детерминированно)
+python3 revo.py stream -l v1.json v2.json v3.json -o out.gif # F-28: layout-streaming — GIF из скелетов
 python3 revo.py pipeline layouts/datacenter.json --outdir demo/datacenter -b zai  # v1-режим тоже жив
 python3 revo_server.py --port 8400             # M2+M3+M4: сервер + веб-редактор + проекты → http://127.0.0.1:8400
 bash tests/smoke_api.sh                        # смоук REST API (34 проверки: M2 + M4-проекты)
@@ -108,7 +110,7 @@ layout.json ──► [1] СКЕЛЕТ      рамки зон, подписи, �
 
 ## Честный статус
 
-- ✅ v2 автономия: compose → render → критик → рефайн → autolog; selftest **14/14** (ядро + сервер + проекты);
+- ✅ v2 автономия: compose → render → критик → рефайн → autolog; selftest **24/24** (ядро + сервер + проекты + M5 + M6);
 - ✅ M2 сервер: `revo_server.py` только stdlib — REST + раздача UI, смоук **34/0** (M2 + M4);
 - ✅ M3 веб-редактор: `app/` (SPA без сборки, file://-демо) — живая браузерная приёмка end-to-end,
   ноль ошибок консоли, скриншоты `demo/ui/`;
@@ -119,6 +121,7 @@ layout.json ──► [1] СКЕЛЕТ      рамки зон, подписи, �
 - ✅ AUTO-PILOT в CI: ежедневный прогон offline, самокоммит, анти-шум;
 - ✅ v1 ядро (skeleton/prompt/render/merge) не тронуто — обратная совместимость;
 - ✅ реестр рендер-бэкендов (F-25: `backend_registry.py` + плагин `poster`, новый бэкенд = файл в backends/ без правки ядра) и image2layout (F-26: `revo.py image2layout photo.jpg -o l.json --zones 5..50`) — M5 исполнено 2026-11-09 (selftest 21/21, смоук 36/0);
+- ✅ M6 (2026-11-18): F-27 мозг >8 зон (`compose --zones 5..64` — детерминированное дробление архетипа; валидатор: жёсткий лимит 64 / предупреждение >20) и F-28 layout-streaming (`revo.py stream` — GIF из последовательности скелетов, SHA256-детерминизм) — selftest 24/24, смоук 36/0;
 - ⚙️ LLM-мозг (ЯРУС 1) и VLM-глаза — опциональные усиления; без них всё работает offline;
 - 🖐 social-preview в настройках репо — только руками в UI (GitHub API это запрещает).
 
@@ -130,7 +133,7 @@ layout.json ──► [1] СКЕЛЕТ      рамки зон, подписи, �
 | Документ | Что внутри |
 |---|---|
 | [SPEC.md](SPEC.md) — ТЗ | хроника смерти с проверенными датами и источниками · честное определение «100%» · 28 требований F-xx с приёмкой · роли агентов |
-| [ROADMAP.md](ROADMAP.md) | фазы M0✅ · M1✅ · M1.5✅ · M2✅ сервер · M3✅ UI-редактор → M4 проекты → M5🔶 парити → M6 |
+| [ROADMAP.md](ROADMAP.md) | фазы M0✅ · M1✅ · M1.5✅ · M2✅ сервер · M3✅ UI-редактор · M4✅ проекты · M5✅ парити/бэкенды · M6✅ расширения (F-27+F-28) |
 | [docs/RESTORE-APP.md](docs/RESTORE-APP.md) | карта поверхностей оригинала · Wayback-указатели (снапшоты 05.11 и 28.10.2026) · целевые экраны · чеклист парити |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | слои, потоки, каталоги, нерушимые контракты |
 | [docs/FORMAT.md](docs/FORMAT.md) | layout.json v1 — зеркальная спека валидатора |
@@ -149,7 +152,7 @@ layout.json ──► [1] СКЕЛЕТ      рамки зон, подписи, �
 (TODO/КОСЯКИ/ОТЧЁТЫ).
 
 ---
-*REVO · серия RTYNBIRF LABS №26 · MIT · v2 автономия + M2 сервер + M3 редактор, 2026-11-09. Сначала структура — потом картинка. Сам.*
+*REVO · серия RTYNBIRF LABS №26 · MIT · v2 автономия + M2 сервер + M3 редактор + M5 бэкенды + M6 расширения, волна M6 2026-11-18. Сначала структура — потом картинка. Сам.*
 
 <!--ФОРЖ:ПОДВАЛ-->
 ---

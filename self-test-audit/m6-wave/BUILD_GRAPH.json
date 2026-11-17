@@ -1,0 +1,25 @@
+{
+  "graph_id": "revo-m6-wave",
+  "created": "2026-11-18",
+  "base_sha": "3caf60b",
+  "nodes": [
+    {
+      "id": "REVO-M6-CODE",
+      "statement": "revo.py волны M6 исполняет F-27 (мозг >8 зон, валидатор 64/предупреждение >20) и F-28 (stream GIF из скелетов)",
+      "source": "github.com/rtynbirf/revo@3caf60b + волна M6",
+      "status": "SUPPORTED",
+      "falsification_or_revision_condition": "selftest 22-24 красный или CI GitHub Actions красный на push → claim отзывается, статус REVISED",
+      "depends_on": []
+    },
+    {
+      "id": "REVO-M6-EVIDENCE",
+      "statement": "claims волны M6 подтверждены машинным CSV + дословными логами и прошли lex-naturae аудит valid=true",
+      "source": "self-test-audit/m6-wave/evidence/ (m6_results.csv, m6_selftest.log, m6_live.log)",
+      "status": "SUPPORTED",
+      "falsification_or_revision_condition": "lex_naturae.py audit_claims.json → valid=false или правка CSV без перегонки прогона → claim отзывается",
+      "depends_on": [
+        "REVO-M6-CODE"
+      ]
+    }
+  ]
+}

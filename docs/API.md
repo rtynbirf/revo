@@ -1,6 +1,6 @@
 # API: CLI (факт) + HTTP (контракт M2) + отчёты
 
-> §1 — зеркало живого CLI (проверено `revo.py --help` и selftest 14/14, 2026-11-09).
+> §1 — зеркало живого CLI (проверено `revo.py --help` и selftest 24/24, волна M6 2026-11-18).
 > §2 — контракт M2: реализован и принят 2026-11-09 (v1.1) — смоук `tests/smoke_api.sh`;
 > **M4-проекты (v1.2): реализованы и приняты 2026-11-09** — смоук **PASS=34 FAIL=0** (15 новых
 > M4-проверок + 7 негативов), selftest-проверка 14 (проект→версия→диф→экспорт→импорт 1:1),
@@ -16,7 +16,7 @@
 | `validate` | `layout` | строгая проверка layout.json | `VALID ✓` / `INVALID:` + список, exit 0/2 |
 | `skeleton` | `layout`, `-o OUT` (обяз.) | PNG-скелет структуры | `saved: PATH` |
 | `prompt` | `layout`, `[-o OUT]` | детерминированный промпт из структуры | текст в stdout или файл |
-| `compose` | `task`, `-o OUT` (обяз.), `--size WxH` (по умолч. 1280x720) | мозг: LLM-ярус или 8 архетипов → layout.json | `brain=llm\|datacenter\|… → OUT VALID ✓` |
+| `compose` | `task`, `-o OUT` (обяз.), `--size WxH` (по умолч. 1280x720), `--zones 5..64` (F-27) | мозг: LLM-ярус или архетипы → layout.json; >8 зон — детерминированное дробление архетипа | `brain=… зон=N → OUT VALID ✓` (+ `ПРЕДУПРЕЖДЕНИЕ` при N>20) |
 | `render` | `layout`, `-o OUT` (обяз.), `-b offline\|zai`, `-s WxH` (по умолч. 1344x768) | рендер выбранным/детектированным бэкендом | `saved: PATH` |
 | `pipeline` | `layout`, `--outdir DIR` (обяз.), `-b …`, `-s …` | v1-режим одним вызовом: skeleton+prompt+render+merge+отчёт | JSON-отчёт (§3.2) |
 | `merge` | `a b`, `-o OUT` (обяз.) | склейка «было → стало» | `saved: PATH` |
@@ -24,15 +24,20 @@
 | `patterns` | `[-t TASK]` | библиотека архетипов / выбор мозга для задания | список или `→ имя (N зон)` |
 | `auto` | `[task]`, `--queue F`, `--outdir D`, `-b …`, `--attempts N` (3), `-s …` | полный автономный цикл: мозг→рендер→критик→рефайн | JSON-отчёт (§3.1+), кадр `pipeline_best.png` |
 | `autolog` | `[outdir=demo/auto]` | пересборка AUTO-LOG.md из `__run.json` | `saved: AUTO-LOG.md` |
-| `selftest` | — | 14 проверок ядра, сервера и проектов | `--- selftest 14/14`, exit 0/1 |
+| `backends` | — | живой срез реестра бэкендов (F-25) | список `name [маркер] описание` |
+| `image2layout` | `image`, `-o OUT` (обяз.), `--zones 5..50` (по умолч. 12) | фото → layout (F-26) | `ФАКТ: image2layout: зон=N … (VALID ✓)` |
+| `stream` | `-l LAYOUT…` (обяз.), `-o OUT` (обяз.), `--fps N` (по умолч. 2.0) | F-28: GIF из последовательности скелетов (layout-streaming-аналог) | JSON-отчёт `{kind, frames, canvas, duration_ms, fps, out}` |
+| `selftest` | — | 24 проверки: ядро, сервер, проекты, M5, M6 | `--- selftest 24/24`, exit 0/1 |
 
-Примеры живого пути (все проверены 2026-11-09):
+Примеры живого пути (проверены 2026-11-09; M6-строки — 2026-11-18):
 ```bash
 python3 revo.py validate layouts/datacenter.json
 python3 revo.py compose "ночной дата-центр на 10000 GPU" -o /tmp/l.json
+python3 revo.py compose "ночной дата-центр на 10000 GPU" -o /tmp/l14.json --zones 14   # F-27
 python3 revo.py render layouts/karaoke-stage.json -o /tmp/k.png -b offline
 python3 revo.py pipeline layouts/datacenter.json --outdir /tmp/p -b offline
 python3 revo.py auto "караоке клуб, магента-неон" --outdir /tmp/a --backend offline
+python3 revo.py stream -l /tmp/v1.json /tmp/v2.json /tmp/v3.json -o /tmp/stream.gif    # F-28
 ```
 
 ## 2. HTTP-контракт `revo_server.py` (M2 — реализован v1.1; M4 — реализован v1.2)

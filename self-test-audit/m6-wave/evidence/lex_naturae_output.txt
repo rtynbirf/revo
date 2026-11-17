@@ -1,0 +1,135 @@
+{
+  "valid": true,
+  "claim_count": 7,
+  "claims": [
+    {
+      "valid": true,
+      "claim_id": "M6-F27-ZONES-14",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 3,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 0
+    },
+    {
+      "valid": true,
+      "claim_id": "M6-F27-VALIDATOR-GATE",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 2,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 1
+    },
+    {
+      "valid": true,
+      "claim_id": "M6-F27-WARN-24",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 2,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 2
+    },
+    {
+      "valid": true,
+      "claim_id": "M6-F28-STREAM-FRAMES",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 2,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 3
+    },
+    {
+      "valid": true,
+      "claim_id": "M6-F28-DET-SHA",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 2,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 4
+    },
+    {
+      "valid": true,
+      "claim_id": "M6-SELFTEST-24-24",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 2,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 5
+    },
+    {
+      "valid": true,
+      "claim_id": "M6-SMOKE-36-0",
+      "kind": "observation",
+      "status": "SUPPORTED",
+      "evidence_count": 2,
+      "evidence_verification": "CHECKED_AGAINST_LOCAL_ARTIFACTS",
+      "evidence_checks": [
+        "csv_cell_value",
+        "text_excerpt"
+      ],
+      "strongest_check": "csv_cell_value",
+      "document_source_attribution": "NOT_APPLICABLE",
+      "link_count": 0,
+      "meaning": "The submitter marked this supported; evidence is not independently authenticated.",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "claim_index": 6
+    }
+  ],
+  "graph_errors": [],
+  "graph_warnings": [],
+  "exit_code": 0
+}

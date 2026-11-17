@@ -39,6 +39,8 @@ Z_ORDER = {"far": 0, "mid": 1, "near": 2}
 Z_FADE = {"far": 0.62, "mid": 0.30, "near": 0.0}
 Z_WEIGHT = {"far": 0.8, "mid": 1.0, "near": 1.2}
 PASS_SCORE = 7.5  # порог приёмки критика
+MAX_ZONES = 64    # F-27 (M6): жёсткий лимит зон валидатора (обещан в FORMAT.md v1.2)
+WARN_ZONES = 20   # F-27 (M6): предупреждение при >20 зон — visual thinking context
 
 FONTS = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -238,27 +240,68 @@ def pick_pattern(task: str) -> dict:
     return best
 
 
-def compose_layout_patterns(task: str, size=(1280, 720)) -> dict:
-    """ЯРУС 0: мозг без сети — архетип + задание в mood + канва."""
+def _split_zone(el: dict, k: int) -> tuple:
+    """F-27: детерминированное дробление зоны вдоль длинной стороны (потомки -a/-b)."""
+    x0, y0, x1, y1 = el["bbox"]
+    w, h = x1 - x0, y1 - y0
+    t = 0.38 + 0.12 * (k % 3)  # точка реза 0.38..0.62 — не всегда середина, но всегда детерминированно
+    if w >= h:
+        cut = x0 + max(1, min(w - 1, int(w * t)))
+        a = {**el, "id": f"{el['id']}-{chr(97 + k % 26)}{k}", "bbox": [x0, y0, cut, y1]}
+        b = {**el, "id": f"{el['id']}-{chr(98 + k % 26)}{k}", "bbox": [cut, y0, x1, y1]}
+    else:
+        cut = y0 + max(1, min(h - 1, int(h * t)))
+        a = {**el, "id": f"{el['id']}-{chr(97 + k % 26)}{k}", "bbox": [x0, y0, x1, cut]}
+        b = {**el, "id": f"{el['id']}-{chr(98 + k % 26)}{k}", "bbox": [x0, cut, x1, y1]}
+    return a, b
+
+
+def _expand_zones(lay: dict, target: int, task: str) -> dict:
+    """F-27 (M6): visual thinking context — доводим архетип до target зон детерминированным
+    дроблением самой большой зоны (ничья — по меньшему id). Одинаковый вход → байт-в-байт
+    одинаковый layout (N-02). Если архетип шире target — честно оставляем как есть."""
+    els = list(lay["elements"])
+    k = int(hashlib.sha256(task.encode()).hexdigest()[:8], 16)  # нумерация потомков — от задания
+    while len(els) < target:
+        i = min(range(len(els)), key=lambda j: (-(els[j]["bbox"][2] - els[j]["bbox"][0])
+                                                * (els[j]["bbox"][3] - els[j]["bbox"][1]),
+                                                els[j]["id"]))
+        a, b = _split_zone(els[i], k)
+        k += 1
+        els[i:i + 1] = [a, b]
+    lay["elements"] = els
+    return lay
+
+
+def compose_layout_patterns(task: str, size=(1280, 720), zones: int | None = None) -> dict:
+    """ЯРУС 0: мозг без сети — архетип + задание в mood + канва.
+    zones (F-27, M6): 5..64 — детерминированное дробление архетипа до N зон (>8 — visual
+    thinking context по Reve). Если архетип шире target — остаётся как есть (честный ФАКТ)."""
     w, h = size
     p = pick_pattern(task)
-    return {
+    lay = {
         "canvas": {"w": w, "h": h},
         "style": {"mood": f"{p['mood']} — task: {task.strip()}"[:300],
                   "palette": p["palette"], "light": p["light"], "perspective": p["perspective"]},
         "elements": [_scale(e, w, h) for e in p["elements"]],
-    }, p["name"]
+    }
+    if zones:
+        lay = _expand_zones(lay, zones, task)
+    return lay, p["name"]
 
 
-def llm_compose(task: str, size=(1280, 720)) -> dict | None:
-    """ЯРУС 1: мозг LLM (z-ai chat) → JSON-лейаут. Любая ошибка → None (не застреваем)."""
+def llm_compose(task: str, size=(1280, 720), zones: int | None = None) -> dict | None:
+    """ЯРУС 1: мозг LLM (z-ai chat) → JSON-лейаут. Любая ошибка → None (не застреваем).
+    zones (F-27): попросить у LLM ровно N зон (до MAX_ZONES, visual thinking context)."""
     if not shutil.which("z-ai"):
         return None
     w, h = size
+    zone_req = (f"elements ровно {zones} шт (лимит {MAX_ZONES})" if zones
+                else "elements 5..8 шт")
     system = (
         "Ты — составитель лейаутов сцен для генерации изображений (метод layout→render). "
         f"Верни ТОЛЬКО JSON без пояснений: canvas {w}x{h}; style(mood, palette base/primary/"
-        "accent/warm, light, perspective [x,y] 0..1); elements 5..8 шт с id, bbox [x0,y0,x1,y1] "
+        f"accent/warm, light, perspective [x,y] 0..1); {zone_req} с id, bbox [x0,y0,x1,y1] "
         "в ПИКСЕЛЯХ на канве, z far|mid|near, role на английском, color hex, glow bool. "
         "Сцена должна читаться: глубина far→near, главный субъект near в центре."
     )
@@ -281,12 +324,13 @@ def llm_compose(task: str, size=(1280, 720)) -> dict | None:
         return None
 
 
-def compose_layout(task: str, size=(1280, 720)):
-    """Мозг: LLM если доступен, иначе паттерны. Всегда возвращает (layout, brain)."""
-    lay = llm_compose(task, size)
+def compose_layout(task: str, size=(1280, 720), zones: int | None = None):
+    """Мозг: LLM если доступен, иначе паттерны. Всегда возвращает (layout, brain).
+    zones (F-27): 5..64 — дробление архетипа до N зон, детерминированно (N-02)."""
+    lay = llm_compose(task, size, zones)
     if lay is not None:
         return lay, "llm"
-    return compose_layout_patterns(task, size)
+    return compose_layout_patterns(task, size, zones)
 
 
 # ============================================================ КРИТИК-ГЛАЗА ===
@@ -393,15 +437,18 @@ def mix(c1, c2, t: float):
 
 
 def load_layout(path: str) -> dict:
-    lay = json.loads(Path(path).read_text(encoding="utf-8"))
+    lay = json.loads(Path(path).read_text(encoding="utf-8-sig"))  # A-82 (AGENTS.md): BOM не убивает парсер
     errs = validate(lay)
     if errs:
         sys.exit("REVO: layout невалиден:\n  - " + "\n  - ".join(errs))
     return lay
 
 
-def validate(lay: dict) -> list:
-    errs = []
+def validate_ex(lay: dict) -> tuple:
+    """F-27 (M6): валидатор → (errors, warnings).
+    Жёсткий лимит MAX_ZONES=64 зон — ошибка; >WARN_ZONES=20 — предупреждение
+    (visual thinking context: зон много — сцена обязана оставаться читаемой)."""
+    errs, warns = [], []
     cv = lay.get("canvas") or {}
     w, h = cv.get("w"), cv.get("h")
     if not (isinstance(w, int) and isinstance(h, int) and 64 <= w <= 4096 and 64 <= h <= 4096):
@@ -409,7 +456,12 @@ def validate(lay: dict) -> list:
     els = lay.get("elements")
     if not isinstance(els, list) or not els:
         errs.append("elements — непустой список")
-        return errs
+        return errs, warns
+    if len(els) > MAX_ZONES:
+        errs.append(f"elements — больше лимита {MAX_ZONES} зон (F-27)")
+    elif len(els) > WARN_ZONES:
+        warns.append(f"elements — {len(els)} зон > {WARN_ZONES} (visual thinking context, "
+                     f"лимит {MAX_ZONES}): следи за читаемостью сцены")
     for i, el in enumerate(els):
         tag = f"elements[{i}]({el.get('id', '?')})"
         bb = el.get("bbox")
@@ -423,7 +475,12 @@ def validate(lay: dict) -> list:
             errs.append(f"{tag}: z ∈ {{far, mid, near}}")
         if not el.get("id"):
             errs.append(f"{tag}: нет id")
-    return errs
+    return errs, warns
+
+
+def validate(lay: dict) -> list:
+    """Совместимая сигнатура M0: только ошибки. Предупреждения — validate_ex()."""
+    return validate_ex(lay)[0]
 
 
 # ------------------------------------------------------------------ M4 ----
@@ -464,7 +521,8 @@ def diff_zones(old: dict, new: dict) -> dict:
             "same": not (added or removed or changed)}
 
 
-def draw_skeleton(lay: dict, out: str) -> str:
+def draw_skeleton_img(lay: dict) -> Image.Image:
+    """Кадр-скелет в памяти (F-28 stream переиспользует тот же рисунок, что и PNG)."""
     w, h = lay["canvas"]["w"], lay["canvas"]["h"]
     base = hex2rgb(lay.get("style", {}).get("palette", {}).get("base", "#0b0f1a"))
     img = Image.new("RGB", (w, h), base)
@@ -487,9 +545,33 @@ def draw_skeleton(lay: dict, out: str) -> str:
         d.line([px - 18, py, px + 18, py], fill=(255, 200, 60), width=2)
         d.line([px, py - 18, px, py + 18], fill=(255, 200, 60), width=2)
         d.text((px + 22, py - 8), "vanishing point", font=f_role, fill=(255, 200, 60))
+    return img
+
+
+def draw_skeleton(lay: dict, out: str) -> str:
+    """PNG-скелет на диск (контракт M0 не меняется)."""
+    img = draw_skeleton_img(lay)
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     img.save(out, optimize=True)
     return out
+
+
+def stream_gif(layout_paths: list, out: str, fps: float = 2.0) -> dict:
+    """F-28 (M6): layout-streaming-аналог — GIF из последовательности скелетов.
+    Каждая версия layout = кадр; сцена «течёт» изменением зон (layout streaming
+    Reve 2.0, Figure 1 отчёта). Честно: аналог по мотивам, не их модель.
+    Детерминизм N-02: одинаковые входы → байт-в-байт одинаковый GIF."""
+    if not layout_paths:
+        sys.exit("REVO stream: нет layouts — передай -l v1.json v2.json …")
+    frames = [draw_skeleton_img(load_layout(p)).convert(
+        "P", palette=Image.Palette.ADAPTIVE, colors=128) for p in layout_paths]
+    duration = max(20, int(round(1000.0 / max(0.1, fps))))
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    frames[0].save(out, save_all=True, append_images=frames[1:],
+                   duration=duration, loop=0, optimize=True)
+    return {"kind": "layout-streaming-analog (F-28)", "frames": len(frames),
+            "canvas": [frames[0].width, frames[0].height],
+            "duration_ms": duration, "fps": fps, "out": out}
 
 
 def compile_prompt(lay: dict) -> str:
@@ -814,7 +896,7 @@ def autolog(outdir: str, outfile: str = "AUTO-LOG.md") -> str:
 def selftest() -> int:
     import tempfile
     ok = 0
-    total = 21  # 10 ядра (M0/M1) + 2 сервера M2 (N-02, F-14) + диф зон (M4) + цикл проектов M4 + 7 M5 (F-25/F-26)
+    total = 24  # 10 ядра (M0/M1) + 2 сервера M2 + 2 M4 + 7 M5 (F-25/F-26) + 3 M6 (F-27×2, F-28)
     tmp = tempfile.mkdtemp(prefix="revo-selftest-")
     good = {"canvas": {"w": 640, "h": 360},
             "style": {"palette": {"base": "#0b0f1a", "accent": "#14b8a6"}},
@@ -1126,6 +1208,72 @@ def selftest() -> int:
           f"21 F-25 сервер: /api/render плагином → 200 PNG; чужое имя → 400 bad_backend{' — ' + note21 if note21 else ''}")
     ok += ok21
 
+    # 22. F-27 (M6): мозг >8 зон — zones=14 → 14 зон, VALID, детерминизм 1:1 (N-02)
+    ok22, note22 = False, ""
+    try:
+        la6, _ = compose_layout_patterns("ночной дата-центр на 10000 GPU", (640, 360), zones=14)
+        lb6, _ = compose_layout_patterns("ночной дата-центр на 10000 GPU", (640, 360), zones=14)
+        e22, _ = validate_ex(la6)
+        sha6a = hashlib.sha256(json.dumps(la6, sort_keys=True).encode()).hexdigest()
+        sha6b = hashlib.sha256(json.dumps(lb6, sort_keys=True).encode()).hexdigest()
+        ok22 = len(la6["elements"]) == 14 and not e22 and sha6a == sha6b
+        if not ok22:
+            note22 = f"зон={len(la6['elements'])} sha_eq={sha6a == sha6b} errs={e22}"
+    except Exception as e:
+        note22 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok22 else "FAIL"),
+          f"22 F-27 мозг>8 зон: zones=14 → 14 зон VALID + детерминизм{' — ' + note22 if note22 else ''}")
+    ok += ok22
+
+    # 23. F-27 (M6): валидатор — 64 ок (+предупреждение); 65 → ошибка; 24 → предупреждение; ≤20 — тишина
+    ok23, note23 = False, ""
+    try:
+        lay64, _ = compose_layout_patterns("ночной дата-центр на 10000 GPU", (640, 360), zones=64)
+        e64, w64 = validate_ex(lay64)
+        lay65 = {"canvas": {"w": 640, "h": 360},
+                 "elements": [dict(lay64["elements"][0], id=f"z{i:02d}", bbox=[5, 5, 7, 7])
+                              for i in range(65)]}
+        e65, w65 = validate_ex(lay65)
+        lay24, _ = compose_layout_patterns("ночной дата-центр на 10000 GPU", (640, 360), zones=24)
+        e24, w24 = validate_ex(lay24)
+        ok23 = (not e64 and len(w64) == 1 and len(e65) == 1 and "64" in e65[0] and not w65
+                and not e24 and len(w24) == 1)
+        if not ok23:
+            note23 = f"64:{len(e64)}e/{len(w64)}w 65:{len(e65)}e/{len(w65)}w 24:{len(e24)}e/{len(w24)}w"
+    except Exception as e:
+        note23 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok23 else "FAIL"),
+          f"23 F-27 валидатор: 64 ок+предупреждение · 65 → ошибка · 24 → предупреждение · ≤20 тишина{' — ' + note23 if note23 else ''}")
+    ok += ok23
+
+    # 24. F-28 (M6): layout-streaming — GIF из 3 скелетов, n_frames=3, детерминизм SHA256 1:1
+    ok24, note24 = False, ""
+    try:
+        v1, _ = compose_layout_patterns("караоке клуб неон", (320, 180), zones=5)
+        v2 = json.loads(json.dumps(v1))
+        v2["elements"][0]["bbox"] = [128, 10, 224, 90]
+        v3 = json.loads(json.dumps(v1))
+        v3["elements"][1]["bbox"] = [20, 40, 100, 120]
+        paths24 = []
+        for i, vv in enumerate((v1, v2, v3), 1):
+            p24 = f"{tmp}/s{i}.json"
+            Path(p24).write_text(json.dumps(vv), encoding="utf-8")
+            paths24.append(p24)
+        g1 = stream_gif(paths24, f"{tmp}/stream_a.gif", fps=2)
+        g2 = stream_gif(paths24, f"{tmp}/stream_b.gif", fps=2)
+        with Image.open(g1["out"]) as im24:
+            n24 = im24.n_frames
+        sha1 = hashlib.sha256(Path(g1["out"]).read_bytes()).hexdigest()
+        sha2 = hashlib.sha256(Path(g2["out"]).read_bytes()).hexdigest()
+        ok24 = n24 == 3 and Path(g2["out"]).exists() and sha1 == sha2
+        if not ok24:
+            note24 = f"frames={n24} sha_eq={sha1 == sha2}"
+    except Exception as e:
+        note24 = f"{type(e).__name__}: {e}"
+    print(("PASS" if ok24 else "FAIL"),
+          f"24 F-28 layout-streaming: GIF из 3 скелетов, n_frames=3, SHA256 1:1{' — ' + note24 if note24 else ''}")
+    ok += ok24
+
     print(f"--- selftest {ok}/{total}")
     return 0 if ok == total else 1
 
@@ -1141,6 +1289,9 @@ def main(argv=None):
     p = sub.add_parser("prompt"); p.add_argument("layout"); p.add_argument("-o", "--out")
     p = sub.add_parser("compose"); p.add_argument("task"); p.add_argument("-o", "--out", required=True)
     p.add_argument("--size", default="1280x720")
+    p.add_argument("--zones", type=int, default=None,
+                   help="F-27: 5..64 зон — детерминированное дробление архетипа "
+                        "(>8 зон, visual thinking context)")
     p = sub.add_parser("render"); p.add_argument("layout"); p.add_argument("-o", "--out", required=True)
     p.add_argument("-b", "--backend", default=None,
                    help="имя из реестра (revo.py backends): offline, zai или плагин")
@@ -1162,12 +1313,19 @@ def main(argv=None):
     p = sub.add_parser("image2layout")  # F-26: реконструкция image → layout
     p.add_argument("image"); p.add_argument("-o", "--out", required=True)
     p.add_argument("--zones", type=int, default=12, help="гранулярность 5..50")
+    p = sub.add_parser("stream")  # F-28: layout-streaming — GIF из последовательности скелетов
+    p.add_argument("-l", "--layouts", nargs="+", required=True, metavar="LAYOUT")
+    p.add_argument("-o", "--out", required=True)
+    p.add_argument("--fps", type=float, default=2.0)
     sub.add_parser("selftest")
     args = ap.parse_args(argv)
 
     if args.cmd == "validate":
-        errs = validate(json.loads(Path(args.layout).read_text(encoding="utf-8")))
-        print("VALID ✓" if not errs else "INVALID:\n- " + "\n- ".join(errs))
+        errs, warns = validate_ex(json.loads(Path(args.layout).read_text(encoding="utf-8-sig")))
+        msg = "VALID ✓" if not errs else "INVALID:\n- " + "\n- ".join(errs)
+        if warns and not errs:
+            msg += "\n" + "\n".join("ПРЕДУПРЕЖДЕНИЕ: " + w for w in warns)
+        print(msg)
         sys.exit(0 if not errs else 2)
     if args.cmd == "skeleton":
         print("saved:", draw_skeleton(load_layout(args.layout), args.out))
@@ -1180,10 +1338,17 @@ def main(argv=None):
             print(t)
     elif args.cmd == "compose":
         size = tuple(int(v) for v in args.size.split("x"))
-        lay, brain = compose_layout(args.task, size)
+        if args.zones is not None and not 5 <= args.zones <= MAX_ZONES:
+            sys.exit(f"REVO compose: --zones должен быть 5..{MAX_ZONES} (F-27)")
+        lay, brain = compose_layout(args.task, size, args.zones)
         Path(args.out).write_text(json.dumps(lay, ensure_ascii=False, indent=2), encoding="utf-8")
-        errs = validate(lay)
-        print(f"brain={brain} → {args.out} {'VALID ✓' if not errs else 'INVALID: ' + '; '.join(errs)}")
+        errs, warns = validate_ex(lay)
+        if args.zones and brain != "llm" and len(lay["elements"]) != args.zones:
+            print(f"ФАКТ: архетип шире запрошенного ({len(lay['elements'])} зон ≥ {args.zones}) — оставлен как есть")
+        if warns:
+            print("ПРЕДУПРЕЖДЕНИЕ: " + "; ".join(warns))
+        print(f"brain={brain} зон={len(lay['elements'])} → {args.out} "
+              f"{'VALID ✓' if not errs else 'INVALID: ' + '; '.join(errs)}")
         sys.exit(0 if not errs else 2)
     elif args.cmd == "render":
         lay_r = load_layout(args.layout)
@@ -1221,6 +1386,9 @@ def main(argv=None):
         print(json.dumps(rep, ensure_ascii=False, indent=2))
     elif args.cmd == "autolog":
         print("saved:", autolog(args.outdir))
+    elif args.cmd == "stream":
+        print(json.dumps(stream_gif(args.layouts, args.out, args.fps),
+                         ensure_ascii=False, indent=2))
     elif args.cmd == "selftest":
         sys.exit(selftest())
 

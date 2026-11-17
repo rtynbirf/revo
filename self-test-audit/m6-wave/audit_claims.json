@@ -1,0 +1,251 @@
+{
+  "claims": [
+    {
+      "claim_id": "M6-F27-ZONES-14",
+      "statement": "REVO compose (ЯРУС 0) с zones=14 возвращает валидный layout ровно из 14 зон (F-27, visual thinking context)",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "compose zones=14 → зон",
+          "method": "measurement",
+          "result": "14 зон, VALID",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "revo.py CLI + selftest 24 проверок",
+          "unit": "count",
+          "measurement_value": 14,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 2,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "selftest-проверка 22 PASS дословно",
+          "method": "log_analysis",
+          "result": "PASS 22 F-27 мозг>8 зон: zones=14 → 14 зон VALID + детерминизм",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_selftest.log",
+          "raw_data_sha256": "9a42d39108a3cb50c59ce2ca281eaa2f2a3b12e5eb6dc81c1c7776ee333013a0",
+          "excerpt": "PASS 22 F-27 мозг>8 зон: zones=14 → 14 зон VALID + детерминизм"
+        },
+        {
+          "description": "живой CLI-прогон дословно",
+          "method": "log_analysis",
+          "result": "brain=datacenter зон=14 → /tmp/m6-live/layout14.json VALID ✓",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_live.log",
+          "raw_data_sha256": "fdf7c14c9e4820e26578bbd65e07605c679ae91afb547a077878a4a0adb5194c",
+          "excerpt": "brain=datacenter зон=14 → /tmp/m6-live/layout14.json VALID ✓"
+        }
+      ]
+    },
+    {
+      "claim_id": "M6-F27-VALIDATOR-GATE",
+      "statement": "Валидатор REVO: 65 зон → ровно 1 ошибка с лимитом 64 (F-27), 0 предупреждений",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "65 зон → ошибок валидатора",
+          "method": "measurement",
+          "result": "1 ошибка (лимит 64)",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "revo.validate_ex",
+          "unit": "count",
+          "measurement_value": 1,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 3,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "selftest-проверка 23 PASS дословно",
+          "method": "log_analysis",
+          "result": "PASS 23 F-27 валидатор: 64 ок+предупреждение · 65 → ошибка · 24 → предупреждение · ≤20 тишина",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_selftest.log",
+          "raw_data_sha256": "9a42d39108a3cb50c59ce2ca281eaa2f2a3b12e5eb6dc81c1c7776ee333013a0",
+          "excerpt": "PASS 23 F-27 валидатор: 64 ок+предупреждение · 65 → ошибка · 24 → предупреждение · ≤20 тишина"
+        }
+      ]
+    },
+    {
+      "claim_id": "M6-F27-WARN-24",
+      "statement": "Валидатор REVO: 24 зоны → ровно 1 предупреждение validate_ex при 0 ошибок (>20 — visual thinking context, не ошибка)",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "24 зоны → предупреждений validate_ex",
+          "method": "measurement",
+          "result": "1 предупреждение",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "revo.validate_ex",
+          "unit": "count",
+          "measurement_value": 1,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 4,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "живой CLI-прогон: строка предупреждения дословно",
+          "method": "log_analysis",
+          "result": "ПРЕДУПРЕЖДЕНИЕ: elements — 24 зон > 20 (visual thinking context, лимит 64): следи за читаемостью сцены",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_live.log",
+          "raw_data_sha256": "fdf7c14c9e4820e26578bbd65e07605c679ae91afb547a077878a4a0adb5194c",
+          "excerpt": "ПРЕДУПРЕЖДЕНИЕ: elements — 24 зон > 20 (visual thinking context, лимит 64): следи за читаемостью сцены"
+        }
+      ]
+    },
+    {
+      "claim_id": "M6-F28-STREAM-FRAMES",
+      "statement": "revo.py stream (F-28) собирает GIF из последовательности 3 скелетов: n_frames=3",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "GIF кадров (n_frames)",
+          "method": "measurement",
+          "result": "3 кадра",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "revo.stream_gif + PIL",
+          "unit": "count",
+          "measurement_value": 3,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 5,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "selftest-проверка 24 PASS дословно",
+          "method": "log_analysis",
+          "result": "PASS 24 F-28 layout-streaming: GIF из 3 скелетов, n_frames=3, SHA256 1:1",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_selftest.log",
+          "raw_data_sha256": "9a42d39108a3cb50c59ce2ca281eaa2f2a3b12e5eb6dc81c1c7776ee333013a0",
+          "excerpt": "PASS 24 F-28 layout-streaming: GIF из 3 скелетов, n_frames=3, SHA256 1:1"
+        }
+      ]
+    },
+    {
+      "claim_id": "M6-F28-DET-SHA",
+      "statement": "Два прогона revo.stream_gif на одинаковых входах дают байт-в-байт одинаковый GIF (N-02, SHA256 1:1)",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "SHA256 двух GIF равны",
+          "method": "measurement",
+          "result": "1:1",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "hashlib.sha256 двух прогонов",
+          "unit": "count",
+          "measurement_value": 1,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 6,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "машинный лог проверки SHA: оба хеша и вердикт дословно",
+          "method": "log_analysis",
+          "result": "equal=True (sha_a == sha_b, N-02 детерминизм GIF)",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_sha_check.log",
+          "raw_data_sha256": "2b08b592cd4b1634b139eac9b1c0413a5aa91fff3a75fbd63857f997da339f46",
+          "excerpt": "equal=True (sha_a == sha_b, N-02 детерминизм GIF)"
+        }
+      ]
+    },
+    {
+      "claim_id": "M6-SELFTEST-24-24",
+      "statement": "Полный selftest REVO волны M6 зелёный: 24 из 24 проверок PASS",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "selftest PASS-проверок",
+          "method": "measurement",
+          "result": "--- selftest 24/24",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "python3 revo.py selftest",
+          "unit": "count",
+          "measurement_value": 24,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 7,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "итоговая строка selftest дословно",
+          "method": "log_analysis",
+          "result": "--- selftest 24/24",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_selftest.log",
+          "raw_data_sha256": "9a42d39108a3cb50c59ce2ca281eaa2f2a3b12e5eb6dc81c1c7776ee333013a0",
+          "excerpt": "--- selftest 24/24"
+        }
+      ]
+    },
+    {
+      "claim_id": "M6-SMOKE-36-0",
+      "statement": "REST-смоук REVO волны M6 зелёный: PASS=36 FAIL=0 (HTTP-контракт M2/M4 не задет F-27)",
+      "kind": "observation",
+      "scope": "волна M6 revo 2026-11-18, base 3caf60b",
+      "scope_id": "revo-m6-wave",
+      "status": "SUPPORTED",
+      "evidence": [
+        {
+          "description": "smoke PASS",
+          "method": "measurement",
+          "result": "---- smoke: PASS=36 FAIL=0",
+          "protocol": "живой прогон волны M6 (revo base 3caf60b), offline, без сети",
+          "instrument": "bash tests/smoke_api.sh",
+          "unit": "count",
+          "measurement_value": 36,
+          "raw_data_ref": "evidence/m6_results.csv",
+          "raw_data_sha256": "fdca4131828f4a77835e8e5f437f5670aebd8d7da8d00a2fcaf7ce40bed29d32",
+          "quantity": "count",
+          "csv_row": 8,
+          "csv_column": "count_actual",
+          "tolerance": 0
+        },
+        {
+          "description": "итоговая строка смоука дословно",
+          "method": "log_analysis",
+          "result": "---- smoke: PASS=36 FAIL=0",
+          "protocol": "дословная строка из лога прогона волны M6",
+          "raw_data_ref": "evidence/m6_live.log",
+          "raw_data_sha256": "fdf7c14c9e4820e26578bbd65e07605c679ae91afb547a077878a4a0adb5194c",
+          "excerpt": "---- smoke: PASS=36 FAIL=0"
+        }
+      ]
+    }
+  ]
+}
