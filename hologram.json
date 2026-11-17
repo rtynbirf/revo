@@ -2,7 +2,7 @@
  "hologram": 1,
  "root": "c223bd4a2f6a56783c1fbdb1b1f671fa61c3150ecf320c82796ea5763043a696",
  "n": 73,
- "storage": 68,
+ "storage": 36,
  "r": 3,
  "self": {
   "name": "revo",
@@ -312,6 +312,18 @@
    "cluster": ""
   },
   {
+   "name": "invariant-manifest",
+   "desc": "МАНИФЕСТ ИНВАРИАНТА · FORK 3 · v0.2.3 · CONDITIONAL PASS · seed 7170 · stdlib-only · порождение должно мочь быть опровергнутым",
+   "lang": "Python",
+   "cluster": ""
+  },
+  {
+   "name": "kb",
+   "desc": "Знания дома: канон-тексты, гайды, досье — место по канону §4",
+   "lang": "",
+   "cluster": ""
+  },
+  {
    "name": "polimat-hub",
    "desc": "POLIMAT-HUB: место сверок мультиагента-архитектора. Архитектура, журнал операций, пломбы, stdlib-инструменты.",
    "lang": "Python",
@@ -328,6 +340,12 @@
    "desc": "UACE x PML — Universal AI Chat Exporter (Evidence First, PML-PANEL 1.0 / PML-STRUCT canon). Final: v29.0.1-evidence",
    "lang": "JavaScript",
    "cluster": ""
+  },
+  {
+   "name": "voice-atlas-llm",
+   "desc": "Атлас-LLM: модель-эксперт по клонированию голоса (дизентанглмент, TTS/VC/SVC/SVS) — LoRA-обучение на корпусе атласа 2026, RAG, гейты качества",
+   "lang": "Python",
+   "cluster": "ATLASES"
   }
  ]
 }
