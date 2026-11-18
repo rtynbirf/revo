@@ -2,7 +2,7 @@
  "hologram": 1,
  "root": "fa0d45027377525990ab301a5564049ca3663229e7ac80e3fb1503a69500ccf7",
  "n": 73,
- "storage": 36,
+ "storage": 37,
  "r": 3,
  "self": {
   "name": "revo",
@@ -340,12 +340,6 @@
    "desc": "UACE x PML — Universal AI Chat Exporter (Evidence First, PML-PANEL 1.0 / PML-STRUCT canon). Final: v29.0.1-evidence",
    "lang": "JavaScript",
    "cluster": ""
-  },
-  {
-   "name": "voice-atlas-llm",
-   "desc": "Атлас-LLM: модель-эксперт по клонированию голоса (дизентанглмент, TTS/VC/SVC/SVS) — LoRA-обучение на корпусе атласа 2026, RAG, гейты качества",
-   "lang": "Python",
-   "cluster": "ATLASES"
   }
  ]
 }
