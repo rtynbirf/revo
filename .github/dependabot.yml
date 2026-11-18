@@ -2,7 +2,8 @@
 # (практика GitHub Blog 2026 «Tame Dependabot»: меньше шума, одна пачка на ревью).
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
+  - package-ecosystem:
+    open-pull-requests-limit: 0  # версионный шум Dependabot выключен (чистка аккаунта 2026-11-18) "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
@@ -10,7 +11,8 @@ updates:
       monthly-batch:
         patterns: ["*"]
 
-  - package-ecosystem: "pip"
+  - package-ecosystem:
+    open-pull-requests-limit: 0  # версионный шум Dependabot выключен (чистка аккаунта 2026-11-18) "pip"
     directory: "/"
     schedule:
       interval: "monthly"
