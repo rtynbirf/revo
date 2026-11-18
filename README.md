@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="banner.png" alt="revo — Метод Reve: сначала LAYOUT — потом RENDER · Серия LABS №26" width="100%">
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/revo@main/banner.png" alt="revo — Метод Reve: сначала LAYOUT — потом RENDER · Серия LABS №26" width="100%">
 </div>
 
 <!--ФОРЖ:МУЗА:НАЧАЛО-->
 <div align="center">
-  <img src="repo-muse.svg" width="100%" alt="Муза revo: мастерская БАУХАУС · АЛЬБЕРС, кузня ПОЛИМАТ, раунд 12 · REVE=РЕВО" />
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/revo@main/repo-muse.svg" width="100%" alt="Муза revo: мастерская БАУХАУС · АЛЬБЕРС, кузня ПОЛИМАТ, раунд 12 · REVE=РЕВО" />
   <br/>
-  <img src="forge-divider.svg" width="62%" alt="делитель мастерской БАУХАУС · АЛЬБЕРС" />
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/revo@main/forge-divider.svg" width="62%" alt="делитель мастерской БАУХАУС · АЛЬБЕРС" />
 </div>
 <!--ФОРЖ:МУЗА:КОНЕЦ-->
 
