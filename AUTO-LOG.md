@@ -16,3 +16,4 @@
 | 2026-11-15T11:59 | rooftop garden at sunset over the city | cyber-city | offline | 1 | **7.98** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-15/pipeline_best.png) |
 | 2026-11-16T12:50 | ночной дата-центр на 10000 GPU, инженер в оранжевом жилете | datacenter | offline | 1 | **8.04** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-16/pipeline_best.png) |
 | 2026-11-17T13:32 | underground karaoke club, magenta neon, crowd silhouettes | karaoke | offline | 2 | **7.5** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-17/pipeline_best.png) |
+| 2026-11-18T13:08 | неоновый мегаполис после дождя, отражения в асфальте | cyber-city | offline | 1 | **7.98** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-18/pipeline_best.png) |

@@ -1,0 +1,85 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic cinematic cyberpunk megacity street at night after rain — task: неоновый мегаполис после дождя, отражения в асфальте",
+    "palette": {
+      "base": "#0a0e18",
+      "primary": "#06b6d4",
+      "accent": "#f43f5e",
+      "warm": "#fbbf24"
+    },
+    "light": "cyan and magenta neon signage reflections in wet asphalt, volumetric fog, cold street lamps",
+    "perspective": [
+      0.5,
+      0.5
+    ]
+  },
+  "elements": [
+    {
+      "id": "towers-far",
+      "bbox": [
+        64,
+        58,
+        1216,
+        324
+      ],
+      "z": "far",
+      "color": "#164e63",
+      "role": "dense skyscraper silhouettes with tiny lit windows fading in fog"
+    },
+    {
+      "id": "signs-left",
+      "bbox": [
+        26,
+        180,
+        384,
+        504
+      ],
+      "z": "mid",
+      "color": "#f43f5e",
+      "glow": true,
+      "role": "stacked neon advertisement signs in a foreign alphabet"
+    },
+    {
+      "id": "signs-right",
+      "bbox": [
+        896,
+        180,
+        1254,
+        504
+      ],
+      "z": "mid",
+      "color": "#06b6d4",
+      "glow": true,
+      "role": "stacked cyan holographic billboards"
+    },
+    {
+      "id": "street",
+      "bbox": [
+        0,
+        518,
+        1280,
+        720
+      ],
+      "z": "near",
+      "color": "#0e1726",
+      "role": "wet asphalt street mirroring the neon"
+    },
+    {
+      "id": "figure",
+      "bbox": [
+        563,
+        360,
+        717,
+        648
+      ],
+      "z": "near",
+      "color": "#fbbf24",
+      "glow": true,
+      "role": "lone figure with a transparent umbrella seen from behind"
+    }
+  ]
+}
