@@ -1,0 +1,60 @@
+{
+  "overall": 7.06,
+  "zones": [
+    {
+      "id": "window",
+      "score": 0.983,
+      "mean_rgb": [
+        157,
+        132,
+        52
+      ],
+      "detail_std": 30.2
+    },
+    {
+      "id": "bookshelf",
+      "score": 0.608,
+      "mean_rgb": [
+        96,
+        59,
+        18
+      ],
+      "detail_std": 6.2
+    },
+    {
+      "id": "armchair",
+      "score": 0.617,
+      "mean_rgb": [
+        175,
+        86,
+        16
+      ],
+      "detail_std": 8.3
+    },
+    {
+      "id": "lamp",
+      "score": 0.749,
+      "mean_rgb": [
+        248,
+        208,
+        77
+      ],
+      "detail_std": 5.5
+    },
+    {
+      "id": "rug",
+      "score": 0.651,
+      "mean_rgb": [
+        89,
+        85,
+        80
+      ],
+      "detail_std": 9.1
+    }
+  ],
+  "verdicts": [
+    "ХВОСТ: 'bookshelf' (score 0.608) — усилить контраст/насыщенность",
+    "ХВОСТ: 'armchair' (score 0.617) — усилить контраст/насыщенность"
+  ],
+  "pass": false
+}
