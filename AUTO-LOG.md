@@ -18,3 +18,4 @@
 | 2026-11-17T13:32 | underground karaoke club, magenta neon, crowd silhouettes | karaoke | offline | 2 | **7.5** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-17/pipeline_best.png) |
 | 2026-11-18T13:08 | неоновый мегаполис после дождя, отражения в асфальте | cyber-city | offline | 1 | **7.98** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-18/pipeline_best.png) |
 | 2026-11-19T13:20 | cozy reading room at dawn, warm lamp light | cozy-room | offline | 2 | **7.68** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-19/pipeline_best.png) |
+| 2026-11-20T13:00 | рассвет в горах, туман в долине | mountains | offline | 1 | **7.69** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-20/pipeline_best.png) |

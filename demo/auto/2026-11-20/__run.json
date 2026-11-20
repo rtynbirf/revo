@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-20T13:00:08+00:00",
+  "task": "рассвет в горах, туман в долине",
+  "brain": "mountains",
+  "backend": "offline",
+  "attempts": 1,
+  "best_attempt": 1,
+  "score": 7.69,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-20/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-20/skeleton.png",
+  "layout_elements": 5
+}
