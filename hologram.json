@@ -1,8 +1,8 @@
 {
  "hologram": 1,
- "root": "f9cae3a874a9064bc1ccba9db8e0255366799943b735f2a8be5b259b79316d23",
+ "root": "4bcb8a068871f9158f688c6941bf4b381477a19c0c45283c73811c92000edb94",
  "n": 79,
- "storage": 44,
+ "storage": 74,
  "r": 3,
  "self": {
   "name": "revo",
@@ -109,7 +109,7 @@
   },
   {
    "name": "global-practice-atlas",
-   "hash": "a67f05603d13bf1c7da83d003c8bc9e48ea60dd0e166e1fd2eea58b60f9dd304"
+   "hash": "420b94983834f6bc6de962c180368b34a79340d2a0e638eeeddc040fd7717feb"
   },
   {
    "name": "global-video-platforms-registry",
@@ -332,18 +332,6 @@
   {
    "name": "github-doctrine",
    "desc": "КНИГА ДОКТРИНЫ",
-   "lang": "Python",
-   "cluster": ""
-  },
-  {
-   "name": "invariant-manifest",
-   "desc": "МАНИФЕСТ ИНВАРИАНТА · FORK 3 · v0.2.3 · CONDITIONAL PASS · seed 7170 · stdlib-only · порождение должно мочь быть опровергнутым",
-   "lang": "Python",
-   "cluster": ""
-  },
-  {
-   "name": "kb",
-   "desc": "Знания дома: канон-тексты, гайды, досье — место по канону §4",
    "lang": "Python",
    "cluster": ""
   },
