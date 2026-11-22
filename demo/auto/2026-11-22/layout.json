@@ -1,0 +1,72 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic deep space scene, hard cinematic sci-fi — task: космическая станция над кольцом астероидов",
+    "palette": {
+      "base": "#05060d",
+      "primary": "#818cf8",
+      "accent": "#22d3ee",
+      "warm": "#fbbf24"
+    },
+    "light": "hard single sun key from the side, planet-shine fill, star field, cold rim lights",
+    "perspective": [
+      0.42,
+      0.45
+    ]
+  },
+  "elements": [
+    {
+      "id": "starfield",
+      "bbox": [
+        0,
+        0,
+        1280,
+        720
+      ],
+      "z": "far",
+      "color": "#0b0d1a",
+      "role": "dense star field with faint milky-way band"
+    },
+    {
+      "id": "planet",
+      "bbox": [
+        768,
+        58,
+        1472,
+        540
+      ],
+      "z": "far",
+      "color": "#3b4a8f",
+      "glow": true,
+      "role": "large ringed planet partially lit by the sun"
+    },
+    {
+      "id": "station",
+      "bbox": [
+        192,
+        252,
+        794,
+        490
+      ],
+      "z": "mid",
+      "color": "#818cf8",
+      "glow": true,
+      "role": "modular space station with solar panels and lit windows"
+    },
+    {
+      "id": "asteroids",
+      "bbox": [
+        0,
+        432,
+        960,
+        720
+      ],
+      "z": "near",
+      "color": "#20242f",
+      "role": "scattered asteroids with sun-lit edges"
+    }
+  ]
+}
