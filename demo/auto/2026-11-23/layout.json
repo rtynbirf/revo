@@ -1,0 +1,86 @@
+{
+  "canvas": {
+    "w": 1280,
+    "h": 720
+  },
+  "style": {
+    "mood": "photorealistic forest cabin in morning fog, quiet cinematic mood — task: forest cabin in morning fog, warm window light",
+    "palette": {
+      "base": "#0e1410",
+      "primary": "#4ade80",
+      "accent": "#fbbf24",
+      "warm": "#f97316"
+    },
+    "light": "soft green-tinted fog light, warm window glow cutting through, god rays between pines",
+    "perspective": [
+      0.55,
+      0.5
+    ]
+  },
+  "elements": [
+    {
+      "id": "pines-far",
+      "bbox": [
+        0,
+        36,
+        1280,
+        360
+      ],
+      "z": "far",
+      "color": "#1d2b22",
+      "role": "layered pine forest silhouettes fading into fog"
+    },
+    {
+      "id": "fog",
+      "bbox": [
+        0,
+        302,
+        1280,
+        490
+      ],
+      "z": "mid",
+      "color": "#a7c4b5",
+      "glow": true,
+      "role": "low morning fog glowing in the light"
+    },
+    {
+      "id": "cabin",
+      "bbox": [
+        448,
+        302,
+        870,
+        518
+      ],
+      "z": "mid",
+      "color": "#5f7a44",
+      "role": "wooden log cabin with a stone chimney",
+      "glow": true
+    },
+    {
+      "id": "window-light",
+      "bbox": [
+        563,
+        374,
+        666,
+        446
+      ],
+      "z": "mid",
+      "color": "#fbbf24",
+      "glow": true,
+      "role": "warm lit window of the cabin"
+    },
+    {
+      "id": "path",
+      "bbox": [
+        384,
+        518,
+        1088,
+        720
+      ],
+      "z": "near",
+      "color": "#356c46",
+      "role": "dirt path leading to the cabin through grass",
+      "glow": true
+    }
+  ]
+}

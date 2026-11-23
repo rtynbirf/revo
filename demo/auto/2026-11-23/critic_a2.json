@@ -1,0 +1,57 @@
+{
+  "overall": 8.16,
+  "zones": [
+    {
+      "id": "pines-far",
+      "score": 0.882,
+      "mean_rgb": [
+        39,
+        50,
+        41
+      ],
+      "detail_std": 39.8
+    },
+    {
+      "id": "fog",
+      "score": 0.847,
+      "mean_rgb": [
+        117,
+        137,
+        111
+      ],
+      "detail_std": 23.4
+    },
+    {
+      "id": "cabin",
+      "score": 0.842,
+      "mean_rgb": [
+        94,
+        108,
+        56
+      ],
+      "detail_std": 17.9
+    },
+    {
+      "id": "window-light",
+      "score": 0.756,
+      "mean_rgb": [
+        194,
+        153,
+        37
+      ],
+      "detail_std": 6.5
+    },
+    {
+      "id": "path",
+      "score": 0.776,
+      "mean_rgb": [
+        55,
+        108,
+        71
+      ],
+      "detail_std": 6.7
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}
