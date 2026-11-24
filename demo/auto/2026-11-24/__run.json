@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-24T14:56:02+00:00",
+  "task": "станция метро будущего, бирюзовая подсветка",
+  "brain": "space",
+  "backend": "offline",
+  "attempts": 1,
+  "best_attempt": 1,
+  "score": 7.57,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-24/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-24/skeleton.png",
+  "layout_elements": 4
+}

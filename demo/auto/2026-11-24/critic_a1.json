@@ -1,0 +1,47 @@
+{
+  "overall": 7.57,
+  "zones": [
+    {
+      "id": "starfield",
+      "score": 0.711,
+      "mean_rgb": [
+        35,
+        40,
+        67
+      ],
+      "detail_std": 32.3
+    },
+    {
+      "id": "planet",
+      "score": 0.759,
+      "mean_rgb": [
+        27,
+        33,
+        61
+      ],
+      "detail_std": 23.1
+    },
+    {
+      "id": "station",
+      "score": 0.91,
+      "mean_rgb": [
+        90,
+        98,
+        169
+      ],
+      "detail_std": 25.3
+    },
+    {
+      "id": "asteroids",
+      "score": 0.66,
+      "mean_rgb": [
+        36,
+        40,
+        55
+      ],
+      "detail_std": 11.9
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}

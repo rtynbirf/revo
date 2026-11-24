@@ -21,3 +21,4 @@
 | 2026-11-20T13:00 | рассвет в горах, туман в долине | mountains | offline | 1 | **7.69** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-20/pipeline_best.png) |
 | 2026-11-22T12:39 | космическая станция над кольцом астероидов | space | offline | 1 | **7.57** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-22/pipeline_best.png) |
 | 2026-11-23T14:46 | forest cabin in morning fog, warm window light | cabin | offline | 2 | **8.16** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-23/pipeline_best.png) |
+| 2026-11-24T14:56 | станция метро будущего, бирюзовая подсветка | space | offline | 1 | **7.57** | ✅ pass | [pipeline_best.png](demo/auto/2026-11-24/pipeline_best.png) |
