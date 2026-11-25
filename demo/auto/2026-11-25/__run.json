@@ -1,0 +1,14 @@
+{
+  "date_utc": "2026-11-25T14:29:41+00:00",
+  "task": "rooftop garden at sunset over the city",
+  "brain": "cyber-city",
+  "backend": "offline",
+  "attempts": 1,
+  "best_attempt": 1,
+  "score": 7.98,
+  "pass": true,
+  "verdicts": [],
+  "pipeline": "demo/auto/2026-11-25/pipeline_best.png",
+  "skeleton": "demo/auto/2026-11-25/skeleton.png",
+  "layout_elements": 5
+}
