@@ -1,0 +1,70 @@
+{
+  "overall": 7.38,
+  "zones": [
+    {
+      "id": "lyric-screen",
+      "score": 0.919,
+      "mean_rgb": [
+        128,
+        82,
+        104
+      ],
+      "detail_std": 36.0
+    },
+    {
+      "id": "stage",
+      "score": 0.755,
+      "mean_rgb": [
+        175,
+        65,
+        109
+      ],
+      "detail_std": 22.4
+    },
+    {
+      "id": "spotlight",
+      "score": 0.782,
+      "mean_rgb": [
+        198,
+        150,
+        38
+      ],
+      "detail_std": 8.3
+    },
+    {
+      "id": "microphone",
+      "score": 0.591,
+      "mean_rgb": [
+        243,
+        185,
+        37
+      ],
+      "detail_std": 6.4
+    },
+    {
+      "id": "crowd",
+      "score": 0.682,
+      "mean_rgb": [
+        28,
+        19,
+        50
+      ],
+      "detail_std": 11.9
+    },
+    {
+      "id": "neon-sign",
+      "score": 0.775,
+      "mean_rgb": [
+        183,
+        59,
+        124
+      ],
+      "detail_std": 6.9
+    }
+  ],
+  "verdicts": [
+    "ХВОСТ: 'microphone' (score 0.591) — усилить контраст/насыщенность",
+    "ХВОСТ: 'crowd' (score 0.682) — усилить контраст/насыщенность"
+  ],
+  "pass": false
+}

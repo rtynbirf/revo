@@ -1,0 +1,67 @@
+{
+  "overall": 7.5,
+  "zones": [
+    {
+      "id": "lyric-screen",
+      "score": 0.919,
+      "mean_rgb": [
+        128,
+        82,
+        104
+      ],
+      "detail_std": 35.9
+    },
+    {
+      "id": "stage",
+      "score": 0.714,
+      "mean_rgb": [
+        169,
+        63,
+        111
+      ],
+      "detail_std": 19.5
+    },
+    {
+      "id": "spotlight",
+      "score": 0.748,
+      "mean_rgb": [
+        197,
+        149,
+        41
+      ],
+      "detail_std": 6.3
+    },
+    {
+      "id": "microphone",
+      "score": 0.756,
+      "mean_rgb": [
+        217,
+        151,
+        109
+      ],
+      "detail_std": 6.4
+    },
+    {
+      "id": "crowd",
+      "score": 0.642,
+      "mean_rgb": [
+        76,
+        41,
+        117
+      ],
+      "detail_std": 7.9
+    },
+    {
+      "id": "neon-sign",
+      "score": 0.775,
+      "mean_rgb": [
+        183,
+        59,
+        124
+      ],
+      "detail_std": 6.9
+    }
+  ],
+  "verdicts": [],
+  "pass": true
+}
