@@ -1,5 +1,7 @@
 <div align="center">
-  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/revo@main/banner.png" alt="revo — Метод Reve: сначала LAYOUT — потом RENDER · Серия LABS №26" width="100%">
+
+<a href="https://github.com/rtynbirf/revo"><img src="banner.png" width="100%" alt="revo — штандарт мастерской в каноне ORNAMENTAL MYTHO-REALISM"></a>
+
 </div>
 
 <!--ФОРЖ:МУЗА:НАЧАЛО-->
@@ -12,13 +14,23 @@
 
 <!--ФОРЖ:ПАСПОРТ:НАЧАЛО-->
 <div align="center">
-  <img src="revo-page.svg" width="100%" alt="РЕВО-паспорт страницы revo в каноне ORNAMENTAL MYTHO-REALISM: орнаментальная решётка, медальон-миф, строение файлов, лексикон — по фактическому контенту" />
+  <img src="revo-page.svg" width="100%" alt="РЕВО-паспорт страницы revo №6 в каноне ORNAMENTAL MYTHO-REALISM: орнаментальная решётка, медальон-миф, строение файлов, лексикон — по фактическому контенту" />
 </div>
 
 | ФАЙЛОВ | ПАПОК | КОММИТОВ | ОБНОВЛЕНО | РЕЛИЗОВ |
 |---:|---:|---:|---|---:|
-| 255 | 37 | 190 | 2026-11-28 | 1 |
+| 255 | 40 | 1 | 2026-11-28 | 1 |
 <!--ФОРЖ:ПАСПОРТ:КОНЕЦ-->
+
+# revo
+
+<div align="center">
+  <img src="https://cdn.jsdelivr.net/gh/rtynbirf/revo@main/banner.png" alt="revo — Метод Reve: сначала LAYOUT — потом RENDER · Серия LABS №26" width="100%">
+</div>
+
+
+
+
 
 
 
